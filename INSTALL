@@ -1,0 +1,53 @@
+Installation Instruction
+========================
+faces-project is a project management tool written in
+python. Homepage is at http://faces.homeip.net .
+
+This is a short installation instruction. Tested on a
+gentoo linux (x86_64) system.
+
+Quick
+=====
+> python setup.py build
+and as root
+> python setup.py install
+
+You will normally have trouble with this. Please read on.
+
+Dependencies
+============
+faces-project requires:
+
+- python 2.5.2 
+- wxpython 2.8.8.1 (wxpython 2.6 should also work)
+- numpy 1.1.0 (numpy 1.0.x should also work)
+- cheetah 2.0.1 
+
+You should install this on your computer (gentoo: emerge).
+
+Known Problems
+==============
+You need an *old* version of matplotlib  (0.90.1).  To 
+use this for faces-project (and *not* installing it for
+the rest of the system) do the following:
+
+- install faces 0.11.7 and matplotlib 0.90.1 on a 
+  *different* prefix (e.g. 
+  'python setup.py install --prefix=/home/pasch/mypython') 
+ 
+- patch /home/pasch/mypython/lib64/python2.5/site-packages/matplotlib/numerix/ma/__init__.py 
+  line 12: from numpy.ma import * (instead of 'from numpy.core.ma import *') 
+ 
+- Set the environment variable PYTHONPATH according to your 
+  installation dir (e.g. 
+  'export PYTHONPATH=/home/pasch/mypython/lib64/python2.5/site-packages/') 
+ 
+- run '/home/pasch/mypython/bin/faces' 
+
+Resources
+=========
+http://sourceforge.net/forum/message.php?msg_id=5188880
+http://faces.homeip.net/download.html
+
+aanno
+
