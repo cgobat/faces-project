@@ -1,0 +1,65 @@
+  <table border="0" width="$tile_size[0]"  cellspacing="0" cellpadding="0">
+    <tr>
+      <td colspan="3" class="zoom_bar" valign="middle">
+	&nbsp;
+	<img src="resources/viewmag.gif" style="vertical-align:middle;" border="0"></img>
+#set self.i = 1
+#for self.n in $zoom_names
+#if $level + 1 == self.i
+	<b>($i)</b>
+#else
+	&nbsp;<a href="$n">$i</a>
+#end if
+#set self.i = self.i + 1
+#end for
+      </td>
+    </tr>
+#if $upper_tile
+    <tr>
+      <td class="scroll_bar"></td>
+      <td align="center" class="scroll_bar_up">
+	<a href="$upper_tile"><img src="resources/up.gif" border="0"/></a>
+      </td>
+      <td class="scroll_bar"></td>
+    </tr>
+#end if	
+    <tr>
+#if $left_tile
+      <td class="scroll_bar_left">
+	<a href="$left_tile"><img src="resources/back.gif" border="0"/></a>
+      </td>
+#else
+	<td class="scroll_bar"></td>
+#end if	
+      
+      <td height="$tile_size[1]" class="scroll_bar" align="center">
+	<map name="tips">
+#for self.l, self.t, self.r, self.b, self.text in $tip_infos
+	  <area href="javascript:void(0);" coords="$l,$t,$r,$b"
+	    onmouseover="return overlib('$text', WIDTH, 500, FGCOLOR, '#f1e966');" 
+	    onmouseout="return nd();">
+
+#end for
+	</map>
+	<img src="$image_name" usemap="#tips" border="0">
+	</img>
+      </td>
+#if $right_tile
+      <td class="scroll_bar_right">
+	<a href="$right_tile"><img src="resources/forward.gif" border="0"/></a>
+      </td>
+#else
+      <td class="scroll_bar"></td>
+#end if	
+
+    </tr>
+#if $lower_tile
+    <tr>
+      <td class="scroll_bar"></td>
+      <td align="center" class="scroll_bar_down">
+	<a href="$lower_tile"><img src="resources/down.gif" border="0"></a>
+      </td>
+      <td class="scroll_bar"></td>
+    </tr>
+#end if	
+  </table>

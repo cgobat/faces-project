@@ -1,0 +1,5 @@
+  <table> #slurp
+#for self.line in $lines
+    <tr><td valign=top><b>$line[0]:</b></td><td valign=top>$line[1].replace("\n", "<br/>")</td></tr> #slurp
+#end for 
+  </table>

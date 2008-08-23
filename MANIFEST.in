@@ -1,0 +1,11 @@
+include faces/faces.leo
+recursive-include faces/locale *
+recursive-include faces/po *
+recursive-include faces/gui/resources *
+recursive-include faces/examples *
+recursive-include faces/templates *
+recursive-include faces/howtos *
+recursive-include metapie/po *
+recursive-include metapie/resources *
+recursive-include metapie/locale *
+

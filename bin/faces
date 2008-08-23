@@ -1,0 +1,5 @@
+#!python
+import sys
+sys.path.pop(0)
+from faces.gui.plangui import main
+sys.exit(main())

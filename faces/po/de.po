@@ -1,0 +1,421 @@
+# German translations for PACKAGE package
+# German messages for PACKAGE.
+# Copyright (C) 2005 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+#  <mreithinger@web.de>, 2005.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: pyplan 0.0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2005-06-28 23:10+0200\n"
+"PO-Revision-Date: 2005-06-28 23:14+0200\n"
+"Last-Translator:  <mreithinger@web.de>\n"
+"Language-Team: German <de@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-15\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: report.py:31 report.py:32 charts/gantt.py:584
+msgid "Name"
+msgstr "Name"
+
+#: report.py:33
+msgid "Index"
+msgstr "Index"
+
+#: report.py:34
+msgid "Title"
+msgstr "Titel"
+
+#: report.py:35
+msgid "Start"
+msgstr "Anfang"
+
+#: report.py:36
+msgid "End"
+msgstr "Ende"
+
+#: report.py:37
+msgid "Load"
+msgstr "Auslastung"
+
+#: report.py:38 charts/gantt.py:588
+msgid "Length"
+msgstr "Länge"
+
+#: report.py:39 charts/gantt.py:587
+msgid "Effort"
+msgstr "Aufwand"
+
+#: report.py:40
+msgid "Duration"
+msgstr "Dauer"
+
+#: report.py:41
+msgid "Real Effort"
+msgstr "Angepasster Aufwand"
+
+#: report.py:42
+msgid "Quotient"
+msgstr "Quotient"
+
+#: report.py:43
+msgid "Complete"
+msgstr "Fertigungsgrad"
+
+#: report.py:44
+msgid "Priority"
+msgstr "Priorität"
+
+#: report.py:45
+msgid "Todo"
+msgstr "Todo"
+
+#: report.py:46
+msgid "Efficency"
+msgstr "Effizienz"
+
+#: report.py:47 charts/gantt.py:594
+msgid "Buffer"
+msgstr "Puffer"
+
+#: report.py:48
+msgid "Costs"
+msgstr "Kosten"
+
+#: report.py:49
+msgid "Sum"
+msgstr "Summe"
+
+#: report.py:50
+msgid "Max"
+msgstr "Max"
+
+# Min
+#: report.py:51
+msgid "Min"
+msgstr "Min"
+
+#: report.py:52
+msgid "Milestone"
+msgstr "Meilenstein"
+
+#: report.py:53
+msgid "Resource"
+msgstr "Resourcen"
+
+#: report.py:54
+msgid "Booked Resource"
+msgstr "Resourcen"
+
+#: charts/gantt.py:585
+msgid "Timeframe"
+msgstr "Zeitraum"
+
+#: charts/gantt.py:592
+msgid "Resources"
+msgstr "Resourcen"
+
+#: charts/scheduled.py:34
+msgid "January"
+msgstr "Januar"
+
+#: charts/scheduled.py:34
+msgid "February"
+msgstr "Februar"
+
+#: charts/scheduled.py:34
+msgid "March"
+msgstr "März"
+
+#: charts/scheduled.py:35
+msgid "April"
+msgstr "April"
+
+#: charts/scheduled.py:35
+msgid "May"
+msgstr "Mai"
+
+#: charts/scheduled.py:35
+msgid "June"
+msgstr "Juni"
+
+#: charts/scheduled.py:36
+msgid "July"
+msgstr "Juli"
+
+#: charts/scheduled.py:36
+msgid "August"
+msgstr "August"
+
+#: charts/scheduled.py:36
+msgid "September"
+msgstr "September"
+
+#: charts/scheduled.py:37
+msgid "October"
+msgstr "Oktober"
+
+#: charts/scheduled.py:37
+msgid "November"
+msgstr "November"
+
+#: charts/scheduled.py:37
+msgid "December"
+msgstr "Dezember"
+
+#: charts/scheduled.py:38
+msgid "Monday"
+msgstr "Montag"
+
+#: charts/scheduled.py:38
+msgid "Tuesday"
+msgstr "Dienstag"
+
+#: charts/scheduled.py:38
+msgid "Wednesday"
+msgstr "Mittwoch"
+
+#: charts/scheduled.py:39
+msgid "Thursday"
+msgstr "Donnerstag"
+
+#: charts/scheduled.py:39
+msgid "Friday"
+msgstr "Freitag"
+
+#: charts/scheduled.py:39
+msgid "Saturday"
+msgstr "Samstag"
+
+#: charts/scheduled.py:40
+msgid "Sunday"
+msgstr "Sonntag"
+
+#: charts/scheduled.py:41
+msgid "Week"
+msgstr "Woche"
+
+#: gui/editor.py:101 gui/editor.py:328 gui/editor.py:435 gui/taskfuncs.py:54
+msgid "&Edit"
+msgstr "&Bearbeiten"
+
+#: gui/editor.py:103 gui/editor.py:449
+msgid "&Find\tCTRL-F"
+msgstr "&Finden\tCTRL-F"
+
+#: gui/editor.py:104 gui/editor.py:450
+msgid "Find &Backward\tCTRL-B"
+msgstr "&Rückwärts finden\tCTRL-B"
+
+#: gui/editor.py:105
+msgid ""
+"Press Ctrl-F for next and Ctrl-B for Prev\n"
+" and Ctrl-W for word"
+msgstr ""
+"Ctrl-F findet die nächste Stelle Ctrl-B findet die vorhergehende und Ctrl-W "
+"wählt das gesamte Wort"
+
+#: gui/editor.py:166 gui/editor.py:170
+msgid "&Editor Browser\tF9"
+msgstr "&Editor Browser\tF9"
+
+#: gui/editor.py:436 gui/editor.py:471
+msgid "Fold"
+msgstr "Falten"
+
+#: gui/editor.py:444
+msgid "&Undo\tCTRL-Z"
+msgstr "Rückgängig\tCTRL-Z"
+
+#: gui/editor.py:445
+msgid "&Redo\tCTRL-R"
+msgstr "&Wiederherstellen\tCTRL-R"
+
+#: gui/editor.py:446
+msgid "Cut\tCTRL-X"
+msgstr "&Ausschneiden\tCTRL-X"
+
+#: gui/editor.py:447
+msgid "&Copy\tCTRL-C"
+msgstr "&Kopieren\tCTRL-C"
+
+#: gui/editor.py:448
+msgid "&Paste\tCTRL-V"
+msgstr "&Einfügen\tCTRL-V"
+
+#: gui/editor.py:452 gui/editor.py:472
+msgid "Start Macro Recording"
+msgstr "Macro aufzeichnen"
+
+#: gui/editor.py:453
+msgid "Stop Macro Recording"
+msgstr "Macro abschließen"
+
+#: gui/editor.py:454
+msgid "Execute Macro\tCTRL-E"
+msgstr "Macro ausführen\tCTRL-E"
+
+#: gui/editor.py:469
+msgid "Cut"
+msgstr "&Ausschneiden"
+
+#: gui/editor.py:470
+msgid "Find"
+msgstr "&Finden"
+
+#: gui/editor.py:479
+#, python-format
+msgid "To Level %i\tALT-%i"
+msgstr "Nach Ebene %i\tALT-%i"
+
+#: gui/editor.py:490
+msgid "Recording..."
+msgstr "Aufzeichnen..."
+
+#: gui/plangui.py:79 gui/plangui.py:99 gui/plangui.py:123 gui/plangui.py:172
+#: gui/plangui.py:590
+msgid "<new>"
+msgstr "<neu>"
+
+#: gui/plangui.py:190
+msgid "Choose a filename"
+msgstr "Eine Datei auswählen"
+
+#: gui/plangui.py:193 gui/plangui.py:601
+msgid "Faces Files (*.py)|*.py"
+msgstr "Pyplan Dateien (*.py)|*.py"
+
+#: gui/plangui.py:219 gui/plangui.py:526
+msgid "&File"
+msgstr "&Datei"
+
+#: gui/plangui.py:234 gui/plangui.py:537
+msgid "&Save\tCTRL-S"
+msgstr "&Speichern\tCTRL-S"
+
+#: gui/plangui.py:236 gui/plangui.py:538
+msgid "&Save as..."
+msgstr "Speichern unter..."
+
+#: gui/plangui.py:521
+msgid "&Help"
+msgstr "&Hilfe"
+
+#: gui/plangui.py:523
+msgid "&Online help"
+msgstr "&Online Hilfe"
+
+#: gui/plangui.py:524
+msgid "&About"
+msgstr "&Über..."
+
+#: gui/plangui.py:529
+msgid "&New"
+msgstr "&Neu"
+
+#: gui/plangui.py:530
+msgid "New faces file"
+msgstr "Neue faces Datei"
+
+#: gui/plangui.py:531
+msgid "&Open..."
+msgstr "Ö&ffnen"
+
+#: gui/plangui.py:532
+msgid "Open faces file"
+msgstr "faces datei öffnen"
+
+#: gui/plangui.py:533
+msgid "&Close"
+msgstr "Schließen"
+
+#: gui/plangui.py:581
+msgid "Version "
+msgstr "Version "
+
+#: gui/plangui.py:582
+msgid "About"
+msgstr "Über"
+
+#: gui/plangui.py:598
+msgid "Choose a file"
+msgstr "Eine Datei auswählen"
+
+#: gui/repview.py:47 gui/repview.py:55 gui/repview.py:94
+msgid "&Report"
+msgstr "Be&richt"
+
+#: gui/repview.py:57
+msgid "Move Left\tCTRL-ALT-LEFT"
+msgstr "Nach Links\tCTRL-ALT-LEFT"
+
+#: gui/repview.py:58
+msgid "Move Right\tCTRL-ALT-RIGHT"
+msgstr "Nach Rechts\tCTRL-ALT-RIGHT"
+
+#: gui/repview.py:59
+msgid "Move Up\tCTRL-ALT-UP"
+msgstr "Nach Oben\tCTRL-ALT-UP"
+
+#: gui/repview.py:60
+msgid "Move Down\tCTRL-ALT-DOWN"
+msgstr "Nach Unten\tCTRL-ALT-DOWN"
+
+#: gui/repview.py:62 gui/scheduledview.py:782 gui/scheduledview.py:787
+msgid "Find in Source"
+msgstr "Im Quellcode finden"
+
+#: gui/repview.py:63
+msgid "&Link Report"
+msgstr "Be&richt verbinden"
+
+#: gui/scheduledview.py:774
+msgid "Scroll Left\tALT-LEFT"
+msgstr "Nach links\tALT-LEFT"
+
+#: gui/scheduledview.py:775
+msgid "Scroll Right\tALT-RIGHT"
+msgstr "Nach Rechts\tALT-RIGHT"
+
+#: gui/scheduledview.py:776
+msgid "Scroll Up\tALT-UP"
+msgstr "Nach Oben\tALT-UP"
+
+#: gui/scheduledview.py:777
+msgid "Scroll Down\tALT-DOWN"
+msgstr "Nach Unten\tALT-DOWN"
+
+#: gui/scheduledview.py:778 gui/scheduledview.py:786
+msgid "Horizontal Zoom In\tCTRL-."
+msgstr "Horizontal Vegrößern\tCTRL-."
+
+#: gui/scheduledview.py:779
+msgid "Horizontal Zoom Out\tCTRL-,"
+msgstr "Horizontal verkleinern\tCTRL-,"
+
+#: gui/scheduledview.py:780
+msgid "Fit in Window"
+msgstr "In Fenster einpassen"
+
+#: gui/scheduledview.py:783
+msgid "&Link Chart"
+msgstr "&Gantt Verbinden"
+
+#: gui/scheduledview.py:818
+msgid "&Gantt"
+msgstr "&Gantt"
+
+#: gui/taskfuncs.py:55
+msgid "Copy &Path\tCTRL-P"
+msgstr "&Pfad kopieren\tCTRL-P"
+
+#: gui/taskfuncs.py:57
+msgid "Copy &Name\tCTRL-N"
+msgstr "&Name kopieren\tCTRL-N"
+
+#: gui/taskfuncs.py:61
+msgid "Copy &Path"
+msgstr "&Pfad kopieren"

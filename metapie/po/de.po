@@ -1,0 +1,50 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2005-06-01 02:35+0200\n"
+"PO-Revision-Date: 2005-06-01 02:41+0200\n"
+"Last-Translator:  <mreithinger@web.de>\n"
+"Language-Team: German <de@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-15\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: controller.py:768 controller.py:848
+msgid "&Views"
+msgstr "&Ansichten"
+
+#: controller.py:769
+msgid "Destroy"
+msgstr "Schlieﬂen"
+
+#: controller.py:774
+msgid "&Destroy\tF4"
+msgstr "Schlieﬂen\tF4"
+
+#: controller.py:775
+msgid "&Increase\tF5"
+msgstr "&Vergrˆﬂern\tF5"
+
+#: controller.py:776
+msgid "&Reduce\tF6"
+msgstr "Verkleinern\tF6"
+
+#: controller.py:777
+msgid "&Maximize\tF7"
+msgstr "Maximieren\tF7"
+
+#: controller.py:1113
+msgid "&File"
+msgstr "&Datei"
+
+#: controller.py:1114 controller.py:1115
+msgid "&Exit"
+msgstr "&Beenden"

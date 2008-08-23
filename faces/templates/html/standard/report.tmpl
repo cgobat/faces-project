@@ -1,0 +1,77 @@
+#set align_map = { $Cell.LEFT : "LEFT", $Cell.CENTER : "CENTER", $Cell.RIGHT : "RIGHT" }
+#set cols = len($report.headers)
+#set col_range = range(cols)
+  <table border="0" cellspacing="0">
+    <tr>
+#for col in col_range
+      <td class="header_cell" valign="middle">
+#set self.val = $encode($report.headers[col])
+	$val
+      </td>
+#end for
+    </tr>
+
+#for row in $report:
+    <tr>
+#for col in col_range:
+
+#set align = align_map.get(row[col].align, $Cell.LEFT)
+#set style = ""
+
+#if row[col].font_bold
+#set style = "font-weight:bold;"
+#end if
+
+#if row[col].font_italic
+#set style = style + "font-style:italic;"
+#end if
+
+#if row[col].font_underline
+#set style = style + "text-decoration:underline;"
+#end if
+
+#if row[col].back_color
+#set style = style + "background-color:%s;" % row[col].back_color
+#end if
+
+#if row[col].text_color
+#set style = style + "color:%s;" % row[col].text_color
+#end if
+
+#if row[col].font_size
+#set style = style + "font-size:%s;" % row[col].font_size
+#end if
+
+#if row[col].left_border
+#set style = style + "border-left:1px solid #333333;"
+#end if
+
+#if row[col].top_border
+#set style = style + "border-top:1px solid #333333;"
+#end if
+
+#if row[col].right_border
+#set style = style + "border-right:1px solid #333333;"
+#end if
+
+#if row[col].bottom_border
+#set style = style + "border-bottom:1px solid #333333;"
+#end if
+#set self.style = style
+#set self.align = align
+      <td style="$style" valign="top" align="$align">#slurp
+
+#set val = $encode(row[col])
+#if not val
+	&nbsp;
+#end if
+
+#set self.val=val.replace(" ", "&nbsp;").replace("\n", "<br/>")
+	$val  #slurp
+      </td>
+
+#end for
+    </tr>
+#end for
+
+  </table>

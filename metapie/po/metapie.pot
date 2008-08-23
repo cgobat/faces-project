@@ -1,0 +1,49 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2005-06-01 02:35+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: controller.py:768 controller.py:848
+msgid "&Views"
+msgstr ""
+
+#: controller.py:769
+msgid "Destroy"
+msgstr ""
+
+#: controller.py:774
+msgid "&Destroy\tF4"
+msgstr ""
+
+#: controller.py:775
+msgid "&Increase\tF5"
+msgstr ""
+
+#: controller.py:776
+msgid "&Reduce\tF6"
+msgstr ""
+
+#: controller.py:777
+msgid "&Maximize\tF7"
+msgstr ""
+
+#: controller.py:1113
+msgid "&File"
+msgstr ""
+
+#: controller.py:1114 controller.py:1115
+msgid "&Exit"
+msgstr ""
