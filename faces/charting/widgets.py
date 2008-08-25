@@ -91,9 +91,12 @@ class LazyText(dtext.Text):
     def get_bottom_top(self, renderer):
         height = self.height_cache.get(hash(self._fontproperties))
         if height is None:
+            # get maximum height of font from text 'Xg'
             w, height = renderer.get_text_width_height("Xg",
                                                        self._fontproperties,
                                                        False)
+            # TODO: caching weight here is probably unneeded as matplotlib
+            # is doing it as well (aanno)
             self.height_cache[hash(self._fontproperties)] = height
 
         if self._verticalalignment=='center': yo = -height/2.
@@ -446,7 +449,8 @@ class Widget(artist.Artist, _PropertyAware):
         font_factor = Lazy(point_to_pixel / fig_point_to_pixel)
         for t in filter(lambda t: isinstance(t, dtext.Text), self.artists):
             size = t.get_size()
-            t.set_size(font_factor * t.get_size())
+            # print "set_font_factor", font_factor, t.get_size(), font_factor.get() * t.get_size()
+            t.set_size(font_factor.get() * t.get_size())
     #@-node:set_font_factor
     #@+node:prepare_draw
     def prepare_draw(self, renderer, point_to_pixel, fig_point_to_pixel):

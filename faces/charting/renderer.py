@@ -24,16 +24,21 @@
 Patched Renderers of matplotlib
 """
 
+from matplotlib.ft2font import LOAD_FORCE_AUTOHINT
 import matplotlib.numerix as numerix
 import matplotlib.transforms as mtrans
 import matplotlib.backends.backend_agg as agg
 import math
 
-
+# TODO: most of this seem obsolete with newer
+# versions of matplotlib (aanno)
+# http://matplotlib.sourceforge.net/matplotlib.backends.backend_agg.html#RendererAgg
+#
 class PatchedRendererAgg(agg.RendererAgg):
     def __init__(self, *args, **kwargs):
         agg.RendererAgg.__init__(self, *args, **kwargs)
         self.old_draw_lines = self.draw_lines
+        # self.old_draw_text = self.draw_text
         self.draw_lines = self.patched_draw_lines
         self.dumy_trans = mtrans.identity_transform()
 
@@ -51,23 +56,41 @@ class PatchedRendererAgg(agg.RendererAgg):
         y = numerix.array([y1,y2], typecode=numerix.Float)
         self.patched_draw_lines(gc, x, y)
 
-
+    # A shameless copy from matplotlib/backends/backend_agg.py
+    # with no differences.
     def draw_text(self, gc, x, y, s, prop, angle, ismath):
+        """
+        Render the text
+        """
+        # TODO: make this work again (aanno)
+        # if __debug__: verbose.report('RendererAgg.draw_text', 'debug-annoying')
+
         if ismath:
             return self.draw_mathtext(gc, x, y, s, prop, angle)
 
         font = self._get_agg_font(prop)
         if font is None: return None
-        if len(s)==1 and ord(s)>127:
-            font.load_char(ord(s))
+        if len(s) == 1 and ord(s) > 127:
+            font.load_char(ord(s), flags=LOAD_FORCE_AUTOHINT)
         else:
-            font.set_text(s, angle)
+            font.set_text(s, 0, flags=LOAD_FORCE_AUTOHINT)
         font.draw_glyphs_to_bitmap()
 
-        decent = font.get_descent() / 64.0
         #print x, y, int(x), int(y)
-        
-        self._renderer.draw_text(font, int(x), int(y + decent), gc)
+
+        # TODO: Before we had 'decent = font.get_descent() / 64.0' here and
+        # used 'int(y + decent)' instead of
+        # 'int(y) + 1'. Find out what is right. (aanno)
+
+        # We pass '0' for angle here, since is has already been rotated
+        # (in vector space) in the above call to font.set_text.
+        self._renderer.draw_text_image(font.get_image(), int(x), int(y) + 1, angle, gc)
+
+    # TODO: Get rid of this method and use (plain) get_text_widht_descent.
+    # With this it is perhaps possible to also get rid of font.get_descent() in draw_text
+    def get_text_width_height(self, s, prop, ismath):
+        width, height, descent = self.get_text_width_height_descent(s, prop, ismath)
+        return width, height
 
 
 class PatchedFigureCanvasAgg(agg.FigureCanvasAgg):
@@ -99,3 +122,4 @@ class SpeedupRenderer(PatchedRendererAgg):
         Return an instance of a GraphicsContextBase
         """
         return SpeedupGraphicsContext()
+
