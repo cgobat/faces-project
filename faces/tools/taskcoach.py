@@ -3,7 +3,7 @@
 #   mreithinger@web.de
 #
 #   This file is part of faces.
-#                                                                         
+#
 #   faces is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
 #   the Free Software Foundation; either version 2 of the License, or
@@ -28,151 +28,130 @@ import operator
 import faces.plocale
 import textwrap
 import codecs
+import sys
 
 _ = faces.plocale.get_gettext()
 _is_source_ = True
 _cache = { }
 
-__all__ = ("generate_for_resources", "generate", "clear_cache", "read")
-    
-
-class Forwarder(object):
-    def __init__(self, dest):
-        self.dest = dest
+__all__ = ("generate_for_resources", "generate", "clear_cache", "read", "update_project")
 
 
-class Category(Forwarder):
-    def add_char_data(self, data):
-        self.dest.categories.append(data)
-
-
-class Attachment(Forwarder):
-    def add_char_data(self, data):
-        self.dest.attachments.append(data)
-
-
-class Description(Forwarder):
-    def add_char_data(self, data):
-        self.dest.description.append(data)
-        
-
-class Effort(object):
-    def __init__(self, **attribs):
+class Node(object):
+    def __init__(self, name, **attribs):
+        self.name = name
         self.attribs = attribs
-        self.description = []
+        self.text = []
+        self.children = []
+
+    def add_char_data(self, data):
+        self.text.append(data)
 
     def add_element(self, name, attribs):
-        if name == "description": return Description(self)
-        raise ValueError("wrong file format")
-        
+        element = Node(name, **convert_attribs(attribs))
+        self.children.append(element)
+        return element
+
     def xml(self):
-        attribs = map(lambda kv: '%s="%s"' % kv, self.attribs.items())
-        attribs = " ".join(attribs)
+        attribs = map(lambda kv: u'%s="%s"' % kv, self.attribs.items())
+        attribs = ' '.join(attribs)
+        children = map(lambda x: x.xml(), self.children)
+        children = ''.join(children)
+        return u'<%s %s>%s%s</%s>' % (self.name, attribs, u''.join(self.text), children, self.name)
 
-        def make_tags(tag, seq):
-            templ = "<%s>%%s</%s>" % (tag, tag)
-            return map(lambda v: templ % v, seq)
 
-        children = make_tags("description", self.description)
-        children = "".join(children)
-        return "<effort %s>%s</effort>" % (attribs, children)
-        
+class RecursiveNode(Node):
+    def add_element(self, name, attribs):
+        if name == self.name:
+            element = self.__class__(**convert_attribs(attribs))
+            self.children.append(element)
+            return element
+        return super(RecursiveNode, self).add_element(name, attribs)
 
-class Task(object):
-    def __init__(self, encoding=None, **attribs):
-        self.encoding = encoding
-        self.attribs = attribs
-        self.categories = []
-        self.attachments = []
-        self.children = []
-        self.efforts = []
-        self.description = []
-        
-        
+class Category(RecursiveNode):
+    def __init__(self, **attribs):
+        super(Category, self).__init__('category', **attribs)
+
+        categorizables = attribs.get('categorizables', '')
+        if categorizables:
+            self.categorizables = set(categorizables.split())
+        else:
+            self.categorizables = set()
+
+    def belongs(self, obj):
+        return obj.attribs['id'] in self.categorizables
+
+    def add(self, obj):
+        self.categorizables.add(obj.attribs['id'])
+
+    def xml(self):
+        if self.categorizables:
+            self.attribs['categorizables'] = u' '.join(self.categorizables)
+        else:
+            try:
+                del self.attribs['categorizables']
+            except KeyError:
+                pass
+
+        return super(Category, self).xml()
+
+
+class Effort(Node):
+    def __init__(self, **attribs):
+        super(Effort, self).__init__('effort', **attribs)
+
+
+class Task(RecursiveNode):
+    def __init__(self, **attribs):
+        super(Task, self).__init__('task', **attribs)
+
+    def add_element(self, name, attribs):
+        if name == 'effort':
+            effort = Effort(**convert_attribs(attribs))
+            self.children.append(effort)
+            return effort
+        return super(Task, self).add_element(name, attribs)
+
     def __iter__(self):
         def walkdown(obj):
-            yield obj
+            if isinstance(obj, Task):
+                yield obj
             try:
                 for c in obj.children:
                     for r in walkdown(c):
-                        yield r
+                        if isinstance(r, Task):
+                            yield r
             except AttributeError:
                 pass
 
         return walkdown(self)
 
 
-    def add_element(self, name, attribs):
-        if name == "task":
-            task = Task(**convert_attribs(attribs))
-            self.children.append(task)
-            return task
-
-        if name == "category": return Category(self)
-        if name == "attachment": return Attachment(self)
-        if name == "description": return Description(self)
-        if name == "effort":
-            effort = Effort(**convert_attribs(attribs))
-            self.efforts.append(effort)
-            return effort
-
-        raise ValueError("wrong file format")
-
-
-    def append(self, child):
-        self.children.append(child)
-
-
-    def filter_for_category(self, cat):
-        return filter(lambda t: cat in t.categories, self)
-
-
-    def project_category(self):
-        for c in self.categories:
-            if c.startswith("faces_project:"):
-                return c[14:]
-
-        return False
-    
-
-    def xml(self):
-        attribs = map(lambda kv: '%s="%s"' % kv, self.attribs.items())
-        attribs = " ".join(attribs)
-
-        def make_tags(tag, seq):
-            templ = "<%s>%%s</%s>" % (tag, tag)
-            return map(lambda v: templ % v, seq)
-
-        children = []
-        children += make_tags("category", self.categories)
-        children += make_tags("attachment", self.attachments)
-        children += map(Effort.xml, self.efforts)
-        children += make_tags("description", ["\n".join(self.description)])
-        children = "".join(children)
-
-        if self.encoding:
-            children = children.decode(self.encoding)
-
-        children += "".join(map(Task.xml, self.children))
-        return "<task %s>%s</task>" % (attribs, children)
-        
-
 class TaskList(Task):
     def __init__(self):
         super(TaskList, self).__init__(subject="root")
-        
 
     def add_element(self, name, attribs):
-        if name != "task":
-            raise ValueError("wrong file format")
+        try:
+            element = { 'task': Task,
+                        'category': Category }[name](**convert_attribs(attribs))
+        except KeyError:
+            return super(TaskList, self).add_element(name, attribs)
+        else:
+            self.children.append(element)
+            return element
 
-        return super(TaskList, self).add_element(name, attribs)
-
+    def filter_for_category(self, category):
+        return filter(lambda x: isinstance(x, Task) and category.belongs(x), self.children)
 
     def xml(self):
-        children = map(Task.xml, self.children)
-        children = "".join(children)
-        return "<tasks>%s</tasks>" % children
+        return ''.join(map(lambda x: x.xml(), self.children))
+
+
+def assign_categories(categories, tasks):
+    for category in categories:
+        for task in tasks:
+            category.add(task)
 
 
 def parse_file(path):
@@ -181,25 +160,30 @@ def parse_file(path):
     parser = xml.parsers.expat.ParserCreate()
 
     def start_element(name, attrs):
-        if name == "tasks": return
+        if name == "tasks":
+            return
+
         element = stack[-1].add_element(name, attrs)
         stack.append(element)
 
     def end_element(name):
-        if name == "tasks": return
+        if name == "tasks":
+            return
+
         stack.pop()
-        
+
     def char_data(data):
         stack[-1].add_char_data(data)
-        
+
     parser.StartElementHandler = start_element
     parser.EndElementHandler = end_element
     parser.CharacterDataHandler = char_data
+
     try:
         parser.ParseFile(file(path, "r"))
     except IOError:
         pass
-    
+
     return root
 
 
@@ -208,35 +192,34 @@ def convert_attribs(attribs):
     return dict(zip(map(str, keys), map(attribs.get, keys)))
 
 
-def project_category(project):
-    return "faces_project:%s" % project._idendity_()
-
-
 def make_id(task):
     return '%s:%s'% (id(task), time.time())
 
 
 def make_task(ftask, resource, encoding):
-    t = Task(subject=ftask.name,
-             id=make_id(ftask),
+    t = Task(subject=ftask.name.decode(encoding),
+             id=make_id(ftask).decode(encoding),
              priority=ftask.priority,
              lastModificationTime=str(datetime.datetime.now()),
              startdate=str(ftask.start.to_datetime().date()),
-             duedate=str(ftask.end.to_datetime().date()),
-             encoding=encoding)
+             duedate=str(ftask.end.to_datetime().date()))
+
+    description = Node('description')
 
     if ftask.title != ftask.name:
-        t.description.append(ftask.title)
+        description.text.append(ftask.title)
 
     try:
-        t.description.append(textwrap.dedent(ftask.notes).strip())
+        description.text.append(textwrap.dedent(ftask.notes).strip())
     except AttributeError:
         pass
 
-    t.categories.append("faces")
+    t.children.append(description)
 
-    if resource: resources = [ resource ]
-    else: resources = list(ftask._iter_booked_resources())
+    if resource:
+        resources = [ resource ]
+    else:
+        resources = list(ftask._iter_booked_resources())
 
     if ftask.complete >= 100:
         t.attribs["completiondate"] = t.attribs["duedate"]
@@ -251,19 +234,41 @@ def make_task(ftask, resource, encoding):
                            stop=str(b.book_start + delta))
                 if not resource:
                     e.description.append(r.name)
-                    
-                t.efforts.append(e)
+
+                t.children.append(e)
 
             budget += b.work_time
 
     t.attribs["budget"] = "%i:%i:0" % (budget / 60, budget % 60)
     return t
-    
 
-def read(path, project_id=None, clear_cache=False):
+
+def find_project_categories(root, project_id):
+    for facesCategory in root.children:
+        if isinstance(facesCategory, Category) and facesCategory.attribs['subject'] == 'Faces projects':
+            break
+    else:
+        facesCategory = Category(subject=u'Faces projects')
+        facesCategory.attribs['id'] = make_id(facesCategory)
+        root.children.append(facesCategory)
+
+    for projectCategory in facesCategory.children:
+        if isinstance(projectCategory, Category) and projectCategory.attribs['subject'] == project_id:
+            break
+    else:
+        projectCategory = Category(subject=projectId)
+        projectCategory.attribs['id'] = make_id(projectCategory)
+        facesCategory.children.append(projectCategory)
+
+    return projectCategory, facesCategory
+
+
+def read(path, project_id, clear_cache=False):
     if _cache.has_key(path):
-        if clear_cache: del _cache[path]
-        else: return _cache[path]
+        if clear_cache:
+            del _cache[path]
+        else:
+            return _cache[path]
 
     if isinstance(path, (list, tuple)):
         files = path
@@ -276,35 +281,49 @@ def read(path, project_id=None, clear_cache=False):
     items = []
     for p in files:
         default_resname, ext = os.path.splitext(os.path.basename(p))
-        
-        def find_items(task, path=""):
-            pc = task.project_category()
-            if not path:
-                if not pc: return []
-                if project_id and pc != project_id: return []
-                path = pc
-            else:
-                path = "%s.%s" % (path, task.attribs["subject"])
 
-            items = map(lambda t: find_items(t, path), task.children)
-            if items: return reduce(operator.add, items, [])
+        root = parse_file(p)
+        projectCategory, facesCategory = find_project_categories(root, project_id)
+
+        def find_items(task, path=""):
+            if path:
+                path = '%s.%s' % (path, task.attribs['subject'])
+            else:
+                if not projectCategory.belongs(task):
+                    return []
+                path = project_id
+
+            items = map(lambda t: find_items(t, path), [child for child in task.children if isinstance(child, Task)])
+            if items:
+                return reduce(operator.add, items, [])
 
             def convert_effort(effort):
-                resname = effort.description \
-                           and effort.description[0] \
-                           or default_resname 
+                description = None
+                for child in effort.children:
+                    if child.name == 'description':
+                        try:
+                            description = child.text[0]
+                        except IndexError:
+                            pass
+                        break
+
+                resname = description or default_resname
+
+                fmt = '%Y-%m-%d %H:%M'
                 start = effort.attribs["start"][:16]
                 stop = effort.attribs["stop"][:16]
-                return (path, resname, start, stop)
 
-            return map(convert_effort, task.efforts)
-        
-        root = parse_file(p)
+                delta = datetime.datetime.strptime(stop, fmt) - datetime.datetime.strptime(start, fmt)
+
+                return (path, resname, start, stop, delta)
+
+            return map(convert_effort, [child for child in task.children if isinstance(child, Effort)])
+
         items += reduce(operator.add, map(find_items, root.children), [])
 
     _cache[path] = items
     return items
-        
+
 
 def clear_cache():
     _cache.clear()
@@ -322,27 +341,26 @@ def generate_for_resources(path, project):
 
 def generate(path, project, resource=None, encoding="iso8859-15"):
     root = parse_file(path)
-    pcat = project_category(project)
-    croot = root.filter_for_category(pcat)
+
+    projectCategory, facesCategory = find_project_categories(root, project._idendity_().decode(encoding))
+
+    croot = root.filter_for_category(projectCategory)
+
     cproject = make_task(project, resource, encoding)
-    
+
     if not croot:
         croot = cproject
-        croot.categories.append(pcat)
         root.children.append(croot)
     else:
         croot = croot[0]
         croot.attribs = cproject.attribs
-        croot.attachments = cproject.attachments
-        croot.efforts = cproject.efforts
-        croot.description = cproject.description
         croot.children = []
 
     def add_tasks(ftask, ctask):
         if ftask.children and ftask.effort == 0:
             #a parent task with milestone children only
             return False
-        
+
         for t in ftask.children:
             if t.milestone: continue
             c = make_task(t, resource, encoding)
@@ -353,10 +371,13 @@ def generate(path, project, resource=None, encoding="iso8859-15"):
 
     add_tasks(project, croot)
 
-    
+    assign_categories([facesCategory, projectCategory], croot)
+
     out = codecs.open(path, 'w', 'utf-8')
     print >> out, '<?xml version="1.0" ?>'
-    print >> out, '<?taskcoach release="0.58" tskversion="13"?>'
-    print >> out, root.xml()
+    print >> out, '<?taskcoach release="0.70.1" tskversion="19"?>'
+    print >> out, '<tasks>%s</tasks>' % root.xml().encode('UTF-8')
     out.close()
     return True
+
+ 	  	 
