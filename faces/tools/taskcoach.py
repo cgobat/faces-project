@@ -379,5 +379,3 @@ def generate(path, project, resource=None, encoding="iso8859-15"):
     print >> out, '<tasks>%s</tasks>' % root.xml().encode('UTF-8')
     out.close()
     return True
-
- 	  	 
