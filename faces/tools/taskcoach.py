@@ -256,7 +256,7 @@ def find_project_categories(root, project_id):
         if isinstance(projectCategory, Category) and projectCategory.attribs['subject'] == project_id:
             break
     else:
-        projectCategory = Category(subject=projectId)
+        projectCategory = Category(subject=project_id)
         projectCategory.attribs['id'] = make_id(projectCategory)
         facesCategory.children.append(projectCategory)
 
