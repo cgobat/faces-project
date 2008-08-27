@@ -256,7 +256,7 @@ def find_project_categories(root, project_id):
         if isinstance(projectCategory, Category) and projectCategory.attribs['subject'] == project_id:
             break
     else:
-        projectCategory = Category(subject=projectId)
+        projectCategory = Category(subject=project_id)
         projectCategory.attribs['id'] = make_id(projectCategory)
         facesCategory.children.append(projectCategory)
 
@@ -376,6 +376,6 @@ def generate(path, project, resource=None, encoding="iso8859-15"):
     out = codecs.open(path, 'w', 'utf-8')
     print >> out, '<?xml version="1.0" ?>'
     print >> out, '<?taskcoach release="0.70.1" tskversion="19"?>'
-    print >> out, '<tasks>%s</tasks>' % root.xml().encode('UTF-8')
+    print >> out, '<tasks>%s</tasks>' % root.xml()
     out.close()
     return True
