@@ -42,6 +42,19 @@ http://repo.or.cz/mob.html
  
 for details. 
 
+git short intro
+---------------
+
+You could read more about git at http://git.or.cz/ . 
+
+To check out the repo, use 
+
+> git clone git+ssh://<account_name>@repo.or.cz/srv/git/faces-project.git
+
+To switch to the 'mob' branch, use 
+
+> git checkout mob
+
 branches
 --------
 At present, there are the following branches:
@@ -53,13 +66,5 @@ matplotlib91	towards a faces-project version running on
 
 mob		same as matplotlib91 but writable for everyone (see above)
  
-Kind regards, 
- 
-Thomas (aka aanno@users.sourceforge.net)
- 
-PS: 
-You could read more about git at http://git.or.cz/ 
-To check out the repo, use 
-'git clone git+ssh://<account_name>@repo.or.cz/srv/git/faces-project.git'. 
-To switch to 'mob', use 'git checkout mob'. 
+aanno@users.sourceforge.net
 
