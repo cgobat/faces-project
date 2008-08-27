@@ -1,0 +1,37 @@
+Contributions are welcome. See README.
+
+IDEs
+====
+
+pydev (eclipse plugin)
+----------------------
+Support for pydev is in 'matplotlib91' branch.
+
+1. Copy .pydevproject.aanno to .pydevproject and edit it according to your 
+   needs. The important part is to include a path were a matplotlib 0.91.4 
+   resides.
+
+2. Import the pydev project to eclipse.
+
+3. You could now edit the files, debug, ...
+
+eric4
+----- 
+Support for eric4 is in 'matplotlib91' branch.
+
+I had problem with setting PYTHONPATH within eric4 (4.1.6). If you know you to 
+do this reliably drop me a email.
+
+In the meantime:
+
+1. Start eric4.
+
+2. 'Open Project' and choose file faces-project.e4p
+
+3. Copy bin/faces_eric4_aanno.py and edit the copy to your needs. The important 
+   part is to include a path were a matplotlib 0.91.4 resides.
+
+4. Use your copy of the start script to run/debug faces-project from within
+   eric4.
+
+

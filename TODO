@@ -1,0 +1,5 @@
+- We want faces-project to run on matplotlib 0.91.4
+  (branch matplotlib91 (and mob))
+
+- After this works we want faces-project to run on
+  matplotlib 0.98.3
