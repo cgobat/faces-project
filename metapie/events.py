@@ -1,3 +1,4 @@
+from __future__ import print_function
 ############################################################################
 #   Copyright (C) 2005 by Reithinger GmbH
 #   mreithinger@web.de
@@ -20,6 +21,7 @@
 #   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ############################################################################
 
+from builtins import object
 import weakref
 try:
     set
@@ -74,7 +76,7 @@ class Subject(object):
         if event:
             detach_event(observers.get(event), callback)
         else:
-            for ol in observers.itervalues():
+            for ol in observers.values():
                 detach_event(ol, callback)
                 
 
@@ -114,16 +116,16 @@ if __name__ == "__main__":
         sender = Subject()
 
         def call_me():
-            print "call me"
+            print("call me")
 
-        print "before attach"
+        print("before attach")
         sender.attach_weak(call_me)
 
-        print "after attach"
+        print("after attach")
 
         sender.fire()
 
-        print "end"
+        print("end")
 
     
     test()

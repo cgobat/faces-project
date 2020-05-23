@@ -23,11 +23,14 @@
 """
 Objects that will not be persistent
 """
+from __future__ import absolute_import
+from builtins import str
+from builtins import object
 import metapie
-import peer
+from . import peer
 import bisect
 
-class _ResultSet:
+class _ResultSet(object):
     """Lazily accessed set of objects."""
 
     def __init__(self, uids, uidutil):
@@ -133,21 +136,21 @@ class Container(peer.Peer):
 
 
     def sequence(self):
-        keys = self._container.keys()
+        keys = list(self._container.keys())
         keys.sort()
         return _ResultSet(keys, self._container)
 
 
-    def __nonzero__(self): return len(self._container) > 0
+    def __bool__(self): return len(self._container) > 0
     def __len__(self): return len(self._container)
-    def __iter__(self): return self._container.itervalues()
-    def __contains__(self, imodel): return self._container.has_key(imodel.id())
+    def __iter__(self): return iter(self._container.values())
+    def __contains__(self, imodel): return imodel.id() in self._container
     def __getitem__(self, key): return self._container[key]
     def __delitem__(self, imodel): self.delete(imodel)
 
 
     def _insert_item(self, imodel):
-        if not self._container.has_key(imodel.id()):
+        if imodel.id() not in self._container:
             self._container[imodel.id()] = imodel
             return True
         
@@ -191,5 +194,5 @@ class _PersistentBase(object):
 def _commitdumy(): pass
 metapie._init_db_module("transient", _PersistentBase, Container, _commitdumy)
 
-from dblayout import *
+from .dblayout import *
 

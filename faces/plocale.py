@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 ############################################################################
 #   Copyright (C) 2005 by Reithinger GmbH
 #   mreithinger@web.de
@@ -22,7 +23,7 @@
 
 import gettext
 import os.path
-import locale
+from . import locale
 
 
 def _get_translation():
@@ -38,7 +39,7 @@ def _get_translation():
                 path = os.path.join(path, "locale")
 
             return gettext.translation("faces", path)
-        except Exception, e:
+        except Exception as e:
             return None
 
 def get_gettext():

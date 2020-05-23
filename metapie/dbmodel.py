@@ -2,6 +2,12 @@
 
 ## depreceated!! (use dbzope)
 
+from __future__ import print_function
+from __future__ import division
+from builtins import str
+from builtins import range
+from past.utils import old_div
+from builtins import object
 import datetime
 import sys
 import types
@@ -39,7 +45,7 @@ class ContainerAttribute(Attribute):
         return Container(parent, self.peer_class, self.name_to_me, self.keys)
     
 
-class _MPeerOperation:
+class _MPeerOperation(object):
     def remove_from_peer(self, peer, parent):
         if not self.name_to_me:
             return
@@ -71,7 +77,7 @@ class ReferenceAttribute(Attribute, _MPeerOperation):
 
 
     def convert(self, parent, new_peer):
-        if not isinstance(new_peer, (types.NoneType, self.peer_class)):
+        if not isinstance(new_peer, (type(None), self.peer_class)):
             raise ValueError("'%s' is not of type '%s'"%
                              (str(new_peer), self.peer_class.__name__))
 
@@ -89,7 +95,7 @@ class ReferenceAttribute(Attribute, _MPeerOperation):
         
 
 
-class _ResultSet:
+class _ResultSet(object):
     """Lazily accessed set of objects."""
 
     def __init__(self, uids, uidutil):
@@ -118,7 +124,7 @@ class Container(_MPeerOperation, persistent.Persistent):
         self.keys = {}
         if keys:
             self._p_changed = 1
-            for k, v in keys.iteritems():
+            for k, v in keys.items():
                 self.keys[k] = v()
 
 
@@ -133,7 +139,7 @@ class Container(_MPeerOperation, persistent.Persistent):
 
     def search(self, query, sort=None):
         results = []
-        for k, v in query.iteritems():
+        for k, v in query.items():
             index = self.keys[k]
             r = index.apply(v)
             if r is None:
@@ -159,7 +165,7 @@ class Container(_MPeerOperation, persistent.Persistent):
                 val = [obj._values[s] for s in sort]
                 s_r[tuple(val)] = obj
 
-            return s_r.values()
+            return list(s_r.values())
 
             
         return _ResultSet(result, self.container)
@@ -168,7 +174,7 @@ class Container(_MPeerOperation, persistent.Persistent):
     def __len__(self): return len(self.container)
     def __iter__(self): return iter(self.container)
     def __contains__(self, y): return y in self.container
-    def __iter__(self): return self.container.itervalues()
+    def __iter__(self): return iter(self.container.values())
 
 
     def __delitem__(self, id):
@@ -179,7 +185,7 @@ class Container(_MPeerOperation, persistent.Persistent):
 
     def _insert_item(self, obj):
         id_ = id(obj)
-        if self.container.has_key(id_):
+        if id_ in self.container:
             return False
 
         self.container.insert(id(obj), obj)
@@ -188,7 +194,7 @@ class Container(_MPeerOperation, persistent.Persistent):
 
 
     def _del_item(self, obj):
-        if not self.has_key(id_):
+        if id_ not in self:
             return False
         
         del self.container[id(obj)]
@@ -197,31 +203,31 @@ class Container(_MPeerOperation, persistent.Persistent):
 
 
     def _recatalog(self, obj):
-        if self.has_key(id(obj)):
+        if id(obj) in self:
             self._remove_from_index(obj)
             self._add_to_index(obj)
 
 
     def _add_to_index(self, obj):
         id_ = id(obj)
-        for k, v in self.keys.iteritems():
+        for k, v in self.keys.items():
             v.index_doc(id_, obj._values[k])
 
 
     def _remove_from_index(self, obj):
         id_ = id(obj)
-        for v in self.keys.values():
+        for v in list(self.keys.values()):
             v.unindex_doc(id_)
 
 
-class End:
+class End(object):
     def __init__(self, class_, name=None, **kwargs):
         self.class_ = class_
         self.name = name
         self.multiplicity = 1
         
         for i in ["multiplicity", "multi"]:
-            if kwargs.has_key(i):
+            if i in kwargs:
                 self.multiplicity = kwargs[i]
         
         self.keys = kwargs.get("keys", None)
@@ -233,13 +239,13 @@ class End:
             if self.multiplicity == 1:
                 raise ValueError("keys need a multiplicity of None")
 
-            for k in self.keys.keys():
+            for k in list(self.keys.keys()):
                 if not hasattr(class_, k):
                     raise ValueError("class '%s' has no attribute '%s'" %
                                      (class_.__name__, k))
                     
 
-class Relation:
+class Relation(object):
     def __init__(self, name, end1, end2):
         self.name = name
         self.__check_name(end1, end2)
@@ -279,7 +285,7 @@ class Relation:
    
 
 #----------------------------------
-class LabelMixin:
+class LabelMixin(object):
     def add_with_label(self, parent, sizer, widget):
         h, v = self.expand_info()
         
@@ -300,7 +306,7 @@ class LabelMixin:
         
 
 
-class WidgetProxy:
+class WidgetProxy(object):
     def add_widget(self, parent, sizer):
         return None
 
@@ -451,7 +457,7 @@ def create_widget_proxi(view, attrib):
     
     
 
-class _View:
+class _View(object):
     def __init__(self, name, model, elements):
         self.name = name
         self.model = model
@@ -467,7 +473,7 @@ class _View:
             if isinstance(e, Attribute):
                 proxy = create_widget_proxi(self, e)
             else:
-                assert(isinstance(e, (types.TupleType, types.ListType)))
+                assert(isinstance(e, (tuple, list)))
                 proxy = e[0](self, *e[1:])
 
             if isinstance(proxy, ExecButton):
@@ -477,7 +483,7 @@ class _View:
 
             setattr(self, proxy.id, proxy)
 
-        rows = len(controls) / cols
+        rows = old_div(len(controls), cols)
         if len(controls) % cols:
             rows += 1
             
@@ -514,7 +520,7 @@ class _View:
             c.add_widget(ctrl_parent, sizer)
             h, v = c.expand_info()
 
-            print "expand", c.id, v, col, row
+            print("expand", c.id, v, col, row)
             if h:
                 growable_cols[col] = True
 
@@ -526,11 +532,11 @@ class _View:
                 col = 0
                 row += 1
 
-        print "growable_rows", growable_rows
-        for r in growable_rows.keys():
+        print("growable_rows", growable_rows)
+        for r in list(growable_rows.keys()):
             sizer.AddGrowableRow(r)
 
-        for c in growable_cols.keys():
+        for c in list(growable_cols.keys()):
             sizer.AddGrowableCol(c)
 
         if buttons:
@@ -655,7 +661,7 @@ app = dbroot.setdefault("application", OOBTree.OOTreeSet())
 
 
 if not len(app):
-    print "app is empty"
+    print("app is empty")
     supp = SubSupplier(name2="n2", name="name1", zip_code="12345", city="munich")
 
     for i in range(0, 200):
@@ -664,9 +670,9 @@ if not len(app):
         
     app.insert(supp)
     get_transaction().commit()
-    print "name2:",supp.name2
+    print("name2:",supp.name2)
 else:
-    print "app is not!! empty"
+    print("app is not!! empty")
 
 
 #app.clear()
@@ -674,8 +680,8 @@ else:
 
 sup2 = Supplier(name="sup2", zip_code="12345", city="munich")
 
-for k in app.keys():
-    print "name:",k.name, len(k.batches), k.batches.name_to_me
+for k in list(app.keys()):
+    print("name:",k.name, len(k.batches), k.batches.name_to_me)
 
     
     id_ = None
@@ -684,7 +690,7 @@ for k in app.keys():
     #result = k.batches.search({"netto": (920, 980),
     #                           "brutto": (50, 100)}, sort=["netto"] )
     for r in k.batches:
-        print "search batch", r.brutto, r.size, r.netto, getattr(r, "size")
+        print("search batch", r.brutto, r.size, r.netto, getattr(r, "size"))
     
     
     ##for p, v in k.batches.iteritems():
@@ -705,10 +711,10 @@ for k in app.keys():
 
 #print supp.method1()
 
-s = app.keys()[0]
+s = list(app.keys())[0]
 view = s.get_view()
 
-print view
+print(view)
 
 #print super(SubSupplier, supp).__class__.__dict__
 
@@ -741,8 +747,8 @@ view.compile(scw)
 
 #wx.StaticText(scw, -1, "lll")
 
-print scw.GetVirtualSize()
-print scw.GetScrollPixelsPerUnit()
+print(scw.GetVirtualSize())
+print(scw.GetScrollPixelsPerUnit())
 
 
 frame.FitInside()

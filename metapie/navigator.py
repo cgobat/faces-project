@@ -21,6 +21,8 @@
 ############################################################################
 
 
+from builtins import str
+from builtins import object
 SIBLING_ABOVE = 1
 SIBLING_BELOW = 2
 

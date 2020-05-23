@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import division
 ############################################################################
 #   Copyright (C) 2005 by Reithinger GmbH
 #   mreithinger@web.de
@@ -20,6 +22,12 @@
 #   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ############################################################################
 
+from builtins import filter
+from builtins import str
+from builtins import map
+from builtins import range
+from past.utils import old_div
+from builtins import object
 import sys
 import faces
 import faces.observer
@@ -33,6 +41,7 @@ import faces.charting.tools as tools
 import matplotlib.font_manager as font
 import matplotlib.transforms as mtrans
 import math
+from future.utils import with_metaclass
 
 try:
     import Cheetah.Template as CHTemplate
@@ -62,7 +71,7 @@ def all(module=None):
         if module:
             iterator = ( module, )
         else:
-            iterator = sys.modules.values()
+            iterator = list(sys.modules.values())
 
         observer = []
         for m in iterator:
@@ -70,7 +79,7 @@ def all(module=None):
                    or getattr(m, "_is_source_", False):
                 continue
 
-            for k, v in m.__dict__.items():
+            for k, v in list(m.__dict__.items()):
                 try:
                     if issubclass(v, faces.observer.Observer):
                         observer.append(v)
@@ -89,8 +98,7 @@ class _GeneratorType(type):
         cls.faces_menu_icon = "run16"
 
 
-class LaTexGenerator(object):
-    __metaclass__ = _GeneratorType
+class LaTexGenerator(with_metaclass(_GeneratorType, object)):
     template = ""
     output = ""
     encoding = "utf-8"
@@ -124,7 +132,7 @@ class LaTexGenerator(object):
             else:
                 of = sys.stdout
 
-            print >> of, template
+            print(template, file=of)
             
             if self.output: of.close()
         finally:
@@ -135,7 +143,7 @@ class LaTexGenerator(object):
 
 
     def encode(self, text):
-        if type(text) is unicode:
+        if type(text) is str:
             return str(text.encode(self.encoding))
         return str(text)
 
@@ -149,8 +157,7 @@ class LaTexGenerator(object):
 
 
 
-class Generator(object):
-    __metaclass__ = _GeneratorType
+class Generator(with_metaclass(_GeneratorType, object)):
     observers = None
     template_path = ""
 
@@ -182,9 +189,9 @@ class Generator(object):
 
     def check(self):
         if not _cheetah_is_installed:
-            print >> sys.stderr, _("You must have installed the "\
+            print(_("You must have installed the "\
                                    + "Cheetah Template engine " \
-                                   + "to perform this")
+                                   + "to perform this"), file=sys.stderr)
             return False
 
         return True
@@ -245,8 +252,8 @@ class HTMLGenerator(Generator):
         utils.progress_update = dumy
         
         self._filter_observers()
-        categories = self.observers.itervalues()
-        prog_steps = sum(map(lambda v: len(v), categories)) + 3
+        categories = iter(self.observers.values())
+        prog_steps = sum([len(v) for v in categories]) + 3
         self.progress_start(_("generate HTML for %s")\
                             % self.__class__.__name__,
                             prog_steps, _("prepare"))
@@ -260,13 +267,13 @@ class HTMLGenerator(Generator):
 
 
     def _filter_observers(self):
-        for k in self.observers.keys():
+        for k in list(self.observers.keys()):
             #in olist are only observers of the same category
             olist = self.observers[k]
             if not hasattr(self, "generate_" + olist[0].__type_name__):
                 olist = []
             else:
-                olist = filter(lambda o: o.visible, olist)
+                olist = [o for o in olist if o.visible]
 
             if not olist:
                 del self.observers[k]
@@ -279,7 +286,7 @@ class HTMLGenerator(Generator):
             self.verbosity = verbosity
             
         if self.verbosity:
-            print "start generating..."
+            print("start generating...")
 
         progress = 0
         
@@ -294,7 +301,7 @@ class HTMLGenerator(Generator):
         old_size = font.fontManager.get_default_size()
         tools.set_default_size(self.font_size)
         try:
-            for olist in self.observers.itervalues():
+            for olist in self.observers.values():
                 #i olist are only observers of the same category
                 generator = getattr(self, "generate_" + olist[0].__type_name__)
                 
@@ -311,7 +318,7 @@ class HTMLGenerator(Generator):
         pages.append((self.frame(), "index.html"))
 
         if self.verbosity:
-            print "write pages"
+            print("write pages")
 
         progress += 1
         self.progress_update(progress,  _("write out html"))
@@ -319,33 +326,33 @@ class HTMLGenerator(Generator):
         for t, n in pages:
             t.links = links
             of = file(os.path.join(path, n), "w")
-            print >> of, t
+            print(t, file=of)
             of.close()
             utils.do_yield()
 
         if self.verbosity:
-            print "finished"
+            print("finished")
 
 
     def clean(self, path):
         if self.verbosity:
-            print "clear the directory", path
+            print("clear the directory", path)
         
         files = os.listdir(path)
-        files = filter(lambda f: f.endswith(".html") \
-                       or f.endswith(".png"), files)
+        files = [f for f in files if f.endswith(".html") \
+                       or f.endswith(".png")]
         for f in files:
             utils.do_yield()
             fp = os.path.join(path, f)
             try:
-                if self.verbosity >= 3: print "remove file", fp
+                if self.verbosity >= 3: print("remove file", fp)
                 os.remove(fp)
             except:
                 pass
 
         try:
             subdir = os.path.join(path, "resources")
-            if self.verbosity >= 3: print "remove subdir", subdir
+            if self.verbosity >= 3: print("remove subdir", subdir)
             shutil.rmtree(subdir, False)
         except:
             pass
@@ -385,11 +392,11 @@ class HTMLGenerator(Generator):
 
     def encode(self, text):
         try:
-            text = text.unicode(self.encoding)
+            text = text.str(self.encoding)
         except AttributeError:
             pass
         
-        if isinstance(text, unicode):
+        if isinstance(text, str):
             return text.encode(self.encoding)
 
         return str(text)
@@ -397,7 +404,7 @@ class HTMLGenerator(Generator):
 
     def generate_report(self, path, report):
         if self.verbosity:
-            print "generate report '%s'" % report.__name__
+            print("generate report '%s'" % report.__name__)
 
         utils.do_yield()
         template = self.template("report.tmpl")
@@ -414,7 +421,7 @@ class HTMLGenerator(Generator):
 
     def generate_matplot_timechart(self, path, chart_class):
         if self.verbosity:
-            print "generate chart '%s'" % chart_class.__name__
+            print("generate chart '%s'" % chart_class.__name__)
 
         pages = []
         first_page = None
@@ -449,7 +456,7 @@ class HTMLGenerator(Generator):
         """
 
         if self.verbosity:
-            print "generate chart '%s'" % chart_class.__name__
+            print("generate chart '%s'" % chart_class.__name__)
 
         pages = []
         first_page = None
@@ -470,7 +477,7 @@ class HTMLGenerator(Generator):
         f = max(hf, vf)
 
         if f > 1.0:
-            min_font = int(max(self.font_size / f, 3))
+            min_font = int(max(old_div(self.font_size, f), 3))
 
             if len(zoom_levels) == 1:
                 zoom_levels = (zoom_levels[0], zoom_levels[0] + 1)
@@ -536,14 +543,14 @@ class HTMLGenerator(Generator):
         if xstep < red_width: xstep *= (1 - self.overlap)
         if ystep < red_height: ystep *= (1 - self.overlap)
 
-        cols = int(math.ceil((red_width) / xstep))
-        rows = int(math.ceil((red_height) / ystep))
+        cols = int(math.ceil(old_div((red_width), xstep)))
+        rows = int(math.ceil(old_div((red_height), ystep)))
 
         #some preparing
         result = []
         if self.verbosity:
-            print "generate %i x %i tiles for chart '%s' at zoom_level %i" % \
-                  (cols, rows, printer._chart.__name__, level + 1)
+            print("generate %i x %i tiles for chart '%s' at zoom_level %i" % \
+                  (cols, rows, printer._chart.__name__, level + 1))
 
         utils.do_yield()
 
@@ -554,8 +561,7 @@ class HTMLGenerator(Generator):
             return printer._chart.__name__ \
                    + "%i_%i_%i." % (zlevel, col, row) + ext
 
-        zoom_names = map(lambda l: cname(0, 0, zlevel=l[0]),
-                         enumerate(zoom_levels))
+        zoom_names = [cname(0, 0, zlevel=l[0]) for l in enumerate(zoom_levels)]
 
         #start generating
         try:
@@ -586,7 +592,7 @@ class HTMLGenerator(Generator):
                 y += ystep
                 
                 if self.verbosity > 1:
-                    print "    tile (%i, %i)" % (c, r)
+                    print("    tile (%i, %i)" % (c, r))
 
                 image_name = cname(c, r, "png")
                 printer.filename = os.path.join(path, image_name)
@@ -625,7 +631,7 @@ class HTMLGenerator(Generator):
             lines = chart.get_tip(widget)
             if lines:
                 template = self.template("tip_window.tmpl")
-                lines = map(lambda l: (self.encode(l[0]), self.encode(l[1])), lines)
+                lines = [(self.encode(l[0]), self.encode(l[1])) for l in lines]
                 template.lines = lines
                 text = str(template)
             else:
@@ -636,9 +642,9 @@ class HTMLGenerator(Generator):
         def is_visible(widget):
             return widget.overlaps(chart._view_lim)
 
-        visible_widget = filter(is_visible, chart._widgets)
-        infos = map(make_info, visible_widget)
-        return filter(lambda i: i[4], infos)
+        visible_widget = list(filter(is_visible, chart._widgets))
+        infos = list(map(make_info, visible_widget))
+        return [i for i in infos if i[4]]
             
 
 if faces.gui_controller and _cheetah_is_installed:
@@ -670,7 +676,7 @@ if faces.gui_controller and _cheetah_is_installed:
             self.title = os.path.splitext(os.path.basename(module.__file__))[0]
             observers = dict([ (o, o.__name__) for o in all(module)()])
             self.__class__.__attributes_map__["observers"].choices = observers
-            self.observers = observers.keys()
+            self.observers = list(observers.keys())
 
 
         def check_constraints(self):
@@ -679,7 +685,7 @@ if faces.gui_controller and _cheetah_is_installed:
                 error.message["output_dir"] = _("Output Directory must be a valid directory")
 
             try:
-                map(int, self.zoom_levels.split(","))
+                list(map(int, self.zoom_levels.split(",")))
             except ValueError:
                 error.message["zoom_levels"] = _("Zoom levels must be a sequence "\
                                                  "of comma seperated integers")
@@ -697,7 +703,7 @@ if faces.gui_controller and _cheetah_is_installed:
                 tile_size = (self.tile_width, self.tile_height)
                 verbosity = self.verbosity
                 clean_path = self.clean_path
-                zoom_levels = map(int, self.zoom_levels.split(","))
+                zoom_levels = list(map(int, self.zoom_levels.split(",")))
                 overlap = self.overlap
                 font_size = self.font_size
                 dpi = self.dpi

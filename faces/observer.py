@@ -34,6 +34,7 @@ This module contains the base class for all observer objects
 #@+node:<< Imports >>
 #@-node:<< Imports >>
 #@nl
+from builtins import object
 _is_source_ = True
 #@+others
 #@+node:class Observer

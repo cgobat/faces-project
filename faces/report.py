@@ -30,16 +30,24 @@
 """
 A report generator
 """
+from __future__ import absolute_import
 #@<< declarations >>
 #@+node:<< declarations >>
-import task
-import observer
+from past.builtins import cmp
+from builtins import next
+from builtins import filter
+from builtins import str
+from builtins import map
+from past.builtins import basestring
+from builtins import object
+from . import task
+from . import observer
 import datetime as datetime
 import inspect
-import pcalendar
-import plocale
-import utils
-from task import _ValueWrapper
+from . import pcalendar
+from . import plocale
+from . import utils
+from .task import _ValueWrapper
 
 _is_source_ = True
 _ = plocale.get_gettext()
@@ -103,20 +111,20 @@ class _ReportValueWrapper(_ValueWrapper):
     #@-node:__init__
     #@+node:_vw
     def _vw(self, operand, *args):
-        refs = map(_has_ref, args)
-        refs = filter(bool, refs)
-        vals = map(_val, args)
+        refs = list(map(_has_ref, args))
+        refs = list(filter(bool, refs))
+        vals = list(map(_val, args))
         result = operand(*vals)
         return _ReportValueWrapper(result, refs and refs[0] or (None, ""))
     #@-node:_vw
     #@+node:_cmp
     def _cmp(self, operand, *args):
-        vals = map(_val, args)
+        vals = list(map(_val, args))
         return operand(*vals)
     #@-node:_cmp
     #@+node:__call__
     def __call__(self, *args):
-        vals = map(_val, args)
+        vals = list(map(_val, args))
         other = _ReportValueWrapper(self._value(*vals),
                                     (self._ref[0], self._ref[1], args))
         return other
@@ -136,9 +144,9 @@ class _ReportValueWrapper(_ValueWrapper):
         return type(self._value)
     #@-node:type
     #@+node:unicode
-    def unicode(self, *args): 
+    def str(self, *args): 
         if isinstance(self._value, str):
-            return unicode(self._value, *args)
+            return str(self._value, *args)
 
         return repr(self)
     #@nonl
@@ -149,7 +157,7 @@ class _ReportValueWrapper(_ValueWrapper):
 #@+node:class _TaskWrapper
 
 
-class _TaskWrapper:
+class _TaskWrapper(object):
     #@	@+others
     #@+node:__init__
     def __init__(self, task):
@@ -190,7 +198,7 @@ class _TaskWrapper:
 #@+node:class _ToStringWrapper
 
 
-class _ToStringWrapper:
+class _ToStringWrapper(object):
     #@	@+others
     #@+node:__init__
     def __init__(self, converter):
@@ -220,7 +228,7 @@ class _ReportIter(object):
         self.report = report
         try:
             self.stepper = iter(report.make_report(report.data))
-        except Exception, e:
+        except Exception as e:
             report._raise(e)
     #@-node:__init__
     #@+node:__iter__
@@ -228,8 +236,8 @@ class _ReportIter(object):
         return self
     #@-node:__iter__
     #@+node:next
-    def next(self):
-        row = self.stepper.next()
+    def __next__(self):
+        row = next(self.stepper)
         if not isinstance(row, (tuple, list)):
             row = (row, )
 
@@ -237,7 +245,7 @@ class _ReportIter(object):
             if isinstance(c, Cell): return c
             return Cell(c)
 
-        row = map(to_cell, row)
+        row = list(map(to_cell, row))
         if row[0].left_border is None:
             row[0].left_border = True
 
@@ -329,7 +337,7 @@ class Cell(object):
     #@	@+others
     #@+node:__init__
     def __init__(self, value, **kwargs):
-        for k, v in kwargs.iteritems():
+        for k, v in kwargs.items():
             setattr(self, k, v)
 
         self.value = value
@@ -342,10 +350,10 @@ class Cell(object):
     #@-node:__str__
     #@+node:__unicode__
     def __unicode__(self):
-        return unicode(self.value)
+        return str(self.value)
     #@-node:__unicode__
     #@+node:__nonzero__
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self.value)
     #@-node:__nonzero__
     #@+node:__cmp__
@@ -360,17 +368,17 @@ class Cell(object):
         return ""
     #@-node:get_label
     #@+node:unicode
-    def unicode(self, *args):
+    def str(self, *args):
         value = self.value
         try:
-            return value.unicode(*args)
+            return value.str(*args)
         except AttributeError:
             pass
 
         if isinstance(value, str):
-            return unicode(value, *args)
+            return str(value, *args)
 
-        return unicode(value)
+        return str(value)
     #@-node:unicode
     #@+node:get_type
     def get_type(self):
@@ -440,7 +448,7 @@ class Report(observer.Observer):
                 result = c.get_label()
                 return header_names.get(result, result)
 
-            first = iter(self).next()
+            first = next(iter(self))
             if not self.headers:
                 self.headers = tuple(map(get_header, first))
     #@-node:__init__
@@ -474,7 +482,7 @@ class Report(observer.Observer):
                 return obj
 
             try:
-                return map(wrap_obj, iter(obj))
+                return list(map(wrap_obj, iter(obj)))
             except TypeError:
                 return obj
 

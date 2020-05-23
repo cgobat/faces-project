@@ -39,7 +39,7 @@ if wx.USE_UNICODE:
                     path = os.path.join(path, "locale")
 
                 return gettext.translation("metapie", path).ugettext
-            except Exception, e:
+            except Exception as e:
                 return lambda msg: msg
 else:
     def get_gettext():

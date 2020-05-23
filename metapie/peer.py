@@ -21,6 +21,7 @@
 ############################################################################
 
 
+from builtins import object
 class Peer(object):
     def _remove_from_peer(self, peer, parent_imodel):
         if not self._name_to_me:

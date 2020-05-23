@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import division
 ############################################################################
 #   Copyright (C) 2005 by Reithinger GmbH
 #   mreithinger@web.de
@@ -20,15 +22,21 @@
 #   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ############################################################################
 
+from past.builtins import cmp
+from builtins import str
+from builtins import map
+from past.utils import old_div
+from builtins import object
 import datetime
 import metapie
-import locale
-import tools
+from . import locale
+from . import tools
 import weakref
-import peer
-import events
+from . import peer
+from . import events
 import sys
-from mtransaction import ConstraintError, Transaction
+from .mtransaction import ConstraintError, Transaction
+from future.utils import with_metaclass
 
 _ = tools.get_gettext()
 
@@ -127,7 +135,7 @@ class Type(object):
 
     def to_string(self, value):
         if value is None: return ""
-        return unicode(value)
+        return str(value)
 
 
     def clone(self):
@@ -248,7 +256,7 @@ class Money(AtomType):
 
 
     def width_format(self):
-        return "0" * (self.width + 1 + self.width / 3) 
+        return "0" * (self.width + 1 + old_div(self.width, 3)) 
 
 
 class Boolean(AtomType):
@@ -346,7 +354,7 @@ class Enumerate(AtomType):
 
 
     def _set_value(self, obj, value):
-        if not self.choices.has_key(value):
+        if value not in self.choices:
             error = ConstraintError()
             msg = _("%(model)s.%(attrib)s must be in "
                     "(%(range)s) but is %(value)s") \
@@ -362,7 +370,7 @@ class Enumerate(AtomType):
 
     def default(self):
         try:
-            return self.defval or self.choices.keys()[0]
+            return self.defval or list(self.choices.keys())[0]
         except IndexError:
             return ""
 
@@ -392,7 +400,7 @@ class MultiEnumerate(AtomType):
             valiter = iter((v, ))
             
         for v in valiter:
-            if not self.choices.has_key(v):
+            if v not in self.choices:
                 error = ConstraintError()
                 msg = _("%(model)s.%(attrib)s must be in "
                         "(%(range)s) but is %(value)s") \
@@ -463,7 +471,7 @@ class ContainerType(Type):
 
     def __value_tuple__(self, imodel):
         container = getattr(imodel, self.name)
-        return tuple(map(lambda c: c.__value_tuple__(), container))
+        return tuple([c.__value_tuple__() for c in container])
         
 
     def _commit_value(self, imodel, proxy):
@@ -598,7 +606,7 @@ class _MetaModel(type):
                 cls.__attributes_map__.update(b.__attributes_map__)
 
         attribs = []
-        for k, v in cls.__dict__.iteritems():
+        for k, v in cls.__dict__.items():
             if isinstance(v, Type):
                 cls.__attributes_map__[k] = v
                 attribs.append((k, v))
@@ -606,9 +614,9 @@ class _MetaModel(type):
         for (k, v) in attribs:
             v._create(cls, k)
 
-        ao = map(lambda a: (a.__id__, a), cls.__attributes_map__.values())
+        ao = [(a.__id__, a) for a in list(cls.__attributes_map__.values())]
         ao.sort()
-        cls.__attributes_tuple__ = tuple(map(lambda a: a[1], ao))
+        cls.__attributes_tuple__ = tuple([a[1] for a in ao])
 
 
     def index(cls):
@@ -631,9 +639,7 @@ class _MetaModel(type):
 
 
 
-class Model(_Model, events.Subject):
-    __metaclass__ = _MetaModel
-
+class Model(with_metaclass(_MetaModel, type('NewBase', (_Model, events.Subject), {}))):
     def __init__(self, **kwargs):
         super(Model, self).__init__()
         self.set(**kwargs)
@@ -649,12 +655,11 @@ class Model(_Model, events.Subject):
 
 
     def __value_tuple__(self):
-        return tuple(map(lambda a: a.__value_tuple__(self),
-                         self.__attributes_tuple__))
+        return tuple([a.__value_tuple__(self) for a in self.__attributes_tuple__])
             
 
     def set(self, **kwargs):
-        for k, v in kwargs.iteritems():
+        for k, v in kwargs.items():
             setattr(self, k, v)
 
 
@@ -662,7 +667,7 @@ class Model(_Model, events.Subject):
         """
         reindex the model in all containers
         """
-        for k, v in self.__attributes_map__.iteritems():
+        for k, v in self.__attributes_map__.items():
             value = getattr(self, k)
             try:
                 getattr(value, v._name_to_me).recatalog(self)
@@ -695,16 +700,16 @@ class Model(_Model, events.Subject):
     def get_view(cls, nview, name_view_class=""):
         try:
             return cls._views_[nview]
-        except KeyError, e:
+        except KeyError as e:
             view = metapie.build_view(cls, nview, name_view_class)
             if view: return view
             #find first view with same class
-            for v in cls._views_.itervalues():
+            for v in cls._views_.values():
                 if v.__name_view_class__ == name_view_class:
                     return v
             
             raise e
-        except AttributeError, e:
+        except AttributeError as e:
             view = metapie.build_view(cls, nview, name_view_class)
             if view: return view
             raise e
@@ -727,8 +732,7 @@ class _MetaModelCollector(_MetaModel):
         cls.__model__.__collector__ = cls
 
 
-class ModelCollector(Model):
-    __metaclass__ = _MetaModelCollector
+class ModelCollector(with_metaclass(_MetaModelCollector, Model)):
     __index__ = None
     __model__ = None
 

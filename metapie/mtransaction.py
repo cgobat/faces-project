@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 ############################################################################
 #   Copyright (C) 2005 by Reithinger GmbH
 #   mreithinger@web.de
@@ -20,7 +21,11 @@
 #   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ############################################################################
 
-import events
+from builtins import filter
+from builtins import str
+from builtins import map
+from builtins import object
+from . import events
 import weakref
 import metapie
 
@@ -34,7 +39,7 @@ class _SequenceProxy(object):
     def __init__(self, proxy, sequence):
         self.proxy = proxy
         self.sequence = sequence
-        for im in proxy._removed_imodels.itervalues():
+        for im in proxy._removed_imodels.values():
             try:
                 del sequence[im]
             except KeyError:
@@ -87,7 +92,7 @@ class Transaction(events.Subject):
             except AttributeError:
                 return
 
-            for k in keys.keys():
+            for k in list(keys.keys()):
                 setattr(self, k, getattr(src, k))
 
 
@@ -99,7 +104,7 @@ class Transaction(events.Subject):
             self._dead = True
             if not self._removed_imodels and not self._new_imodels: return
 
-            for v in self._removed_imodels.itervalues():
+            for v in self._removed_imodels.values():
                 self._src.delete(v, False)
 
             for v in self._new_imodels:
@@ -118,7 +123,7 @@ class Transaction(events.Subject):
                 self._src._add_to_peer(imodel, self._src._imodel)
                 self._src.fire()
             elif (imodel not in self._src \
-                  and id(imodel) not in map(id, self._new_imodels)):
+                  and id(imodel) not in list(map(id, self._new_imodels))):
                 
                 self.mark(imodel)
                 self._new_imodels.append(imodel)
@@ -146,7 +151,7 @@ class Transaction(events.Subject):
                 self._src.fire()
             else:
                 try:
-                    index = map(id, self._new_imodels).index(id(imodel))
+                    index = list(map(id, self._new_imodels)).index(id(imodel))
                 except ValueError:
                     raise KeyError("model does not exist in container", imodel)
                 else:
@@ -183,12 +188,12 @@ class Transaction(events.Subject):
         
         def __contains__(self, imodel):
             id_ = imodel.id()
-            if self._removed_imodels.has_key(id_): return False
+            if id_ in self._removed_imodels: return False
             return imodel in self._src or imodel in self._new_imodels
 
 
         def __getitem__(self, key):
-            if self._removed_imodels.has_key(key):
+            if key in self._removed_imodels:
                 raise KeyError("key does not exist", key)
 
             try:
@@ -217,7 +222,7 @@ class Transaction(events.Subject):
                 
 
         def rollback(self, imodel):
-            for t in imodel.__attributes_map__.itervalues():
+            for t in imodel.__attributes_map__.values():
                 if hasattr(self, t.private_name):
                     t._rollback_value(imodel, self)
                     delattr(self, t.private_name)
@@ -229,7 +234,7 @@ class Transaction(events.Subject):
         def commit(self, imodel):
             self.error = None
             
-            for t in imodel.__attributes_map__.itervalues():
+            for t in imodel.__attributes_map__.values():
                 try:
                     pname = t.private_name
                 except AttributeError:
@@ -349,17 +354,17 @@ class Transaction(events.Subject):
     def commit(self):
         #phase one try commit
         commit_ok = True
-        for imodel, proxy in self.active_imodels.iteritems():
+        for imodel, proxy in self.active_imodels.items():
             try:
                 imodel.check_constraints()
-            except ConstraintError, e:
+            except ConstraintError as e:
                 proxy.error = e
                 commit_ok = False
             else:
                 proxy.error = None
                 
         if commit_ok:
-            for imodel, proxy in self.active_imodels.iteritems():
+            for imodel, proxy in self.active_imodels.items():
                 proxy.commit(imodel)
 
             self.fire("commit", True)
@@ -372,7 +377,7 @@ class Transaction(events.Subject):
 
     def get_errors(self):
         result = {}
-        for imodel, proxy in self.active_imodels.iteritems():
+        for imodel, proxy in self.active_imodels.items():
             try:
                 result[imodel] = proxy.error
             except AttributeError:
@@ -382,7 +387,7 @@ class Transaction(events.Subject):
         
 
     def rollback(self):
-        for imodel, proxy in self.active_imodels.iteritems():
+        for imodel, proxy in self.active_imodels.items():
             proxy.rollback(imodel)
 
         self.fire("rollback")
@@ -397,7 +402,7 @@ class Transaction(events.Subject):
             except ReferenceError:
                 return True
 
-        my_models = filter(is_my_item, self.active_transactions.iteritems())
+        my_models = list(filter(is_my_item, iter(self.active_transactions.items())))
 
         for k, v in my_models:
             del self.active_transactions[k]

@@ -19,6 +19,7 @@
 #   Free Software Foundation, Inc.,
 #   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ############################################################################
+from builtins import object
 import difflib
 
 
@@ -78,33 +79,33 @@ def unify(p1, *args):
     @args: (project1, project2, ...)
     """
     
-    result = map(lambda p: p.path, p1)
+    result = [p.path for p in p1]
 
     for p in args:
-        pl = map(lambda p: p.path, p)
+        pl = [p.path for p in p]
         result = unify_paths(result, pl)
 
     args = list(args)
     args.insert(0, p1)
     for r in result:
-        yield tuple(map(lambda p: p.get_task(r) or None, args))
+        yield tuple([p.get_task(r) or None for p in args])
     
 unify.__call_completion__ = "unify(|project1, project2)"
 
 def difference(p1, *args, **kwargs):
-    result = map(lambda p: p.path, p1)
+    result = [p.path for p in p1]
 
     for p in args:
-        pl = map(lambda p: p.path, p)
+        pl = [p.path for p in p]
         result = unify_paths(result, pl)
 
     cmp_attribs = kwargs.get("cmp_attribs", ("start", "end", "effort"))
-    def extract(t): return map(lambda n: getattr(t, n), cmp_attribs)
+    def extract(t): return [getattr(t, n) for n in cmp_attribs]
 
     args = list(args)
     args.insert(0, p1)
     for r in result:
-        result = tuple(map(lambda p: p.get_task(r) or None, args))
+        result = tuple([p.get_task(r) or None for p in args])
 
         if result[0]:
             if result[0].children: yield result

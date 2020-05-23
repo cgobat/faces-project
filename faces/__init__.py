@@ -60,27 +60,28 @@
     Specifies the height of a graphical widget in units of VSEP.
 
 """
+from __future__ import absolute_import
 
 __version__ = "0.11.7"
 
-from pcalendar import Calendar, WorkingDate, StartDate, EndDate, Minutes
+from .pcalendar import Calendar, WorkingDate, StartDate, EndDate, Minutes
 
-from task import Project, BalancedProject, AdjustedProject, Task, \
+from .task import Project, BalancedProject, AdjustedProject, Task, \
     STRICT, SLOPPY, SMART, Multi, YearlyMax, WeeklyMax, MonthlyMax, \
     DailyMax, VariableLoad
 
-from resource import Resource
-from operators import intersect, unify, difference
-from charting.tools import VSEP, HSEP, LEFT, RIGHT, BOTTOM, \
+from .resource import Resource
+from .operators import intersect, unify, difference
+from .charting.tools import VSEP, HSEP, LEFT, RIGHT, BOTTOM, \
      TOP, VCENTER, HCENTER, FACTOR, \
      set_default_size as set_default_chart_font_size,\
      set_encoding as set_chart_encoding, \
      chart_encoding
 
-from charting.patches import Arrow, Circle, Polygon, RegularPolygon, \
+from .charting.patches import Arrow, Circle, Polygon, RegularPolygon, \
      Shadow, Wedge, Rectangle
 
-from charting.taxis import alt_week_locator
+from .charting.taxis import alt_week_locator
 
 gui_controller = None
 

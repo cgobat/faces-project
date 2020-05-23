@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 ############################################################################
 #   Copyright (C) 2005 by Reithinger GmbH
 #   mreithinger@web.de
@@ -20,7 +21,7 @@
 #   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ############################################################################
 
-import observer
+from . import observer
 import os.path
 import sys
 import os.path

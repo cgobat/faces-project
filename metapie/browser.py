@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 ############################################################################
 #   Copyright (C) 2005 by Reithinger GmbH
 #   mreithinger@web.de
@@ -20,10 +21,12 @@
 #   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ############################################################################
 
+from builtins import object
 import metapie
-import navigator
-import dblayout
+from . import navigator
+from . import dblayout
 import sys
+from future.utils import with_metaclass
 
 
 ##class _MetaBrowser(dblayout._MetaModel):
@@ -146,8 +149,7 @@ class _MetaBrowser(type):
     def __delitem__(cls, obj): del cls.instance[obj]
 
            
-class Browser:
-    __metaclass__ = _MetaBrowser
+class Browser(with_metaclass(_MetaBrowser, object)):
     __bitmap__ = "browse.gif"
     _contained_ = None # the contained class (to be set by subclass)
     _keys_ = None # keys of _contained_ (to be set by subclass)

@@ -24,7 +24,10 @@
 """
 DBObject for the ZODB
 """
+from __future__ import absolute_import
 
+from builtins import str
+from builtins import object
 from ZODB import FileStorage, DB
 from BTrees import OOBTree
 from BTrees.IOBTree import IOBTree, multiunion
@@ -35,7 +38,7 @@ import BTrees.IIBTree as iib
 import transaction
 import persistent
 import metapie
-import peer
+from . import peer
 import time
 
 
@@ -65,7 +68,7 @@ class FileDatabase(Database):
         Database.__init__(self, FileStorage.FileStorage(filename), dbname)
 
 
-class _ResultSet:
+class _ResultSet(object):
     """Lazily accessed set of objects."""
 
     def __init__(self, uids, uidutil):
@@ -126,8 +129,7 @@ class Container(persistent.Persistent, peer.Peer):
         self._length = BTrees.Length.Length()
         
         if index:
-            prop_to_attrib = dict(map(lambda kv: (kv[1]._get_value, kv[1]),
-                                      peer_class.__attributes_map__.iteritems()))
+            prop_to_attrib = dict([(kv[1]._get_value, kv[1]) for kv in iter(peer_class.__attributes_map__.items())])
             
             for attrib, index_type in index:
                 if isinstance(attrib, property):
@@ -164,7 +166,7 @@ class Container(persistent.Persistent, peer.Peer):
 
 
     def recatalog(self, obj):
-        if self._container.has_key(obj.id()):
+        if obj.id() in self._container:
             self._remove_from_index(obj)
             self._add_to_index(obj)
             return True
@@ -173,7 +175,7 @@ class Container(persistent.Persistent, peer.Peer):
 
 
     def sequence(self):
-        return _ResultSet(self._container.keys(), self._container)
+        return _ResultSet(list(self._container.keys()), self._container)
 
 
     def subset(self, idset):
@@ -183,17 +185,17 @@ class Container(persistent.Persistent, peer.Peer):
         return _ResultSet(idset, self._container)
 
 
-    def __nonzero__(self): return self._length() > 0
+    def __bool__(self): return self._length() > 0
     def __len__(self): return self._length()
-    def __iter__(self): return self._container.itervalues()
-    def __contains__(self, y): return self._container.has_key(y.id())
+    def __iter__(self): return iter(self._container.values())
+    def __contains__(self, y): return y.id() in self._container
     def __getitem__(self, key): return self._container[key]
     def __delitem__(self, imodel): self.delete(imodel)
 
 
     def _insert_item(self, obj):
         id_ = obj.id()
-        if self._container.has_key(id_):
+        if id_ in self._container:
             return False
 
         self._length.change(1)
@@ -204,7 +206,7 @@ class Container(persistent.Persistent, peer.Peer):
 
     def _del_item(self, obj):
         id_ = obj.id()
-        if not self._container.has_key(id_):
+        if id_ not in self._container:
             return False
 
         self._length.change(-1)
@@ -215,13 +217,13 @@ class Container(persistent.Persistent, peer.Peer):
 
     def _add_to_index(self, obj):
         id_ = obj.id()
-        for k, v in self._keys.iteritems():
+        for k, v in self._keys.items():
             v.index_id(id_, getattr(obj, k))
 
 
     def _remove_from_index(self, obj):
         id_ = obj.id()
-        for v in self._keys.values():
+        for v in list(self._keys.values()):
             v.unindex_id(id_)
 
 
@@ -254,5 +256,5 @@ class _PersistentBase(persistent.Persistent, object):
     
 metapie._init_db_module("zodb", _PersistentBase, Container, transaction.commit)
 
-from dblayout import *
+from .dblayout import *
 

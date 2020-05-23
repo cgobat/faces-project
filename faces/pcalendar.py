@@ -30,13 +30,25 @@
 """
 This module contains all classes and functions for the project plan calendar
 """
+from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import division
 #@<< Imports >>
 #@+node:<< Imports >>
+from past.builtins import cmp
+from builtins import filter
+from builtins import zip
+from builtins import str
+from builtins import map
+from builtins import range
+from past.builtins import basestring
+from builtins import object
+from past.utils import old_div
 from string import *
 import datetime
 import time
 import re
-import locale
+from . import locale
 import bisect
 import sys
 
@@ -121,7 +133,7 @@ def to_datetime(src):
         try:
             conv = time.strptime(src, f)
             return datetime.datetime(*conv[0:-3])
-        except Exception, e:
+        except Exception as e:
             pass
 
     raise TypeError("'%s' (%s) is not a datetime" % (src, str(type(src))))
@@ -227,7 +239,7 @@ def to_timedelta(src, cal=None, is_duration=False):
     if isinstance(src, datetime.timedelta):
         return datetime.timedelta(src.days, seconds=src.seconds, calendar=cal)
 
-    if isinstance(src, (long, int, float)):
+    if isinstance(src, (int, int, float)):
         src = "%sM" % str(src)
 
     if not isinstance(src, basestring):
@@ -248,9 +260,9 @@ def to_timedelta(src, cal=None, is_duration=False):
 
     def convert_minutes(minutes):
         minutes = int(minutes)
-        hours   = minutes / 60
+        hours   = old_div(minutes, 60)
         minutes = minutes % 60
-        days    = hours / d_w_h
+        days    = old_div(hours, d_w_h)
         hours   = hours % d_w_h
         return [ days, 0, 0, 0, minutes, hours ]
 
@@ -320,7 +332,7 @@ def timedelta_to_str(delta, format, cal=None, is_duration=False):
     days = delta.days
 
     d_r = (days, format)
-    minutes = delta.seconds / 60
+    minutes = old_div(delta.seconds, 60)
 
     def rebase(d_r, cond1, cond2, letter, divisor):
         #rebase the days
@@ -329,7 +341,7 @@ def timedelta_to_str(delta, format, cal=None, is_duration=False):
         days, result = d_r
 
         if cond2:
-            val = days / divisor
+            val = old_div(days, divisor)
             if not val:
                 result = re.sub("{[^{]*?%" + letter + "[^}]*?}", "", result)
 
@@ -363,7 +375,7 @@ def timedelta_to_str(delta, format, cal=None, is_duration=False):
 
     if has_hours:
         if has_minutes:
-            val = minutes / 60
+            val = old_div(minutes, 60)
             if not val:
                 result = re.sub("{[^{]*?%H[^}]*?}", "", result)
 
@@ -512,17 +524,17 @@ class _CalendarItem(int):
         try:
             return int.__new__(cls, val)
         except OverflowError:
-            return int.__new__(cls, sys.maxint)
+            return int.__new__(cls, sys.maxsize)
     #@-node:__new__
     #@+node:round
     def round(self, round_up=True):
         m_t_u = self.calendar.minimum_time_unit
 
         minutes = int(self)
-        base = (minutes / m_t_u) * m_t_u
+        base = (old_div(minutes, m_t_u)) * m_t_u
         minutes %= m_t_u
 
-        round_up = round_up and minutes > 0 or minutes > m_t_u / 2
+        round_up = round_up and minutes > 0 or minutes > old_div(m_t_u, 2)
         if round_up: base += m_t_u
         return self.__class__(base)
     #@-node:round
@@ -552,7 +564,7 @@ class _Minutes(_CalendarItem):
             src = to_timedelta(src, cal, is_duration)
 
         d_w_h = is_duration and 24 or cal.working_hours_per_day
-        src = src.days * d_w_h * 60 + src.seconds / 60
+        src = src.days * d_w_h * 60 + old_div(src.seconds, 60)
         return _CalendarItem.__new__(cls, src)
     #@-node:__new__
     #@+node:__cmp__
@@ -577,9 +589,9 @@ class _Minutes(_CalendarItem):
     def to_timedelta(self, is_duration=False):
         d_w_h = is_duration and 24 or self.calendar.working_hours_per_day
         minutes = int(self)
-        hours = minutes / 60
+        hours = old_div(minutes, 60)
         minutes = minutes % 60
-        days = hours / d_w_h
+        days = old_div(hours, d_w_h)
         hours = hours % d_w_h
         return datetime.timedelta(days, hours=hours, minutes=minutes)
     #@nonl
@@ -645,7 +657,7 @@ class _WorkingDateBase(_CalendarItem):
     def __add__(self, other):
         try:
             return self.__class__(int(self) + int(self._minutes(other)))
-        except ValueError, e:
+        except ValueError as e:
             raise e
         except:
             return NotImplemented
@@ -729,10 +741,10 @@ class Calendar(object):
         '8:00-10:00'
         """
         time_ranges = [ trange ] + list(further_tranges)
-        time_ranges = filter(bool, map(to_time_range, time_ranges))
+        time_ranges = list(filter(bool, list(map(to_time_range, time_ranges))))
         days = _to_days(day_range)
 
-        for k in days.keys():
+        for k in list(days.keys()):
             self.working_times[k] = time_ranges
 
         self._recalc_working_time()
@@ -766,10 +778,10 @@ class Calendar(object):
 
         delta = value - self.EPOCH
         days = delta.days
-        minutes = delta.seconds / 60
+        minutes = old_div(delta.seconds, 60)
 
         #calculate the weektime
-        weeks = days / 7
+        weeks = old_div(days, 7)
         wtime = self.week_time * weeks
 
         #calculate the daytime
@@ -797,7 +809,7 @@ class Calendar(object):
             if value < end:
                 if nstart < nend:
                     delta = value - start
-                    delta = delta.days * 24 * 60 + delta.seconds / 60
+                    delta = delta.days * 24 * 60 + old_div(delta.seconds, 60)
                     result = nstart + delta
                 else:
                     result = nstart
@@ -810,18 +822,18 @@ class Calendar(object):
     def split_time(self, value):
         #map exceptional timespans
         num_dt_can = self._num_dt_can
-        pos = bisect.bisect(num_dt_can, (value, sys.maxint)) - 1
+        pos = bisect.bisect(num_dt_can, (value, sys.maxsize)) - 1
         if pos >= 0:
             nstart, nend, start, end, cend = num_dt_can[pos]
             if value < nend:
                 value = start + datetime.timedelta(minutes=value - nstart)
                 delta = value - self.EPOCH
-                return delta.days / 7, delta.days % 7, delta.seconds / 60, -1
+                return old_div(delta.days, 7), delta.days % 7, old_div(delta.seconds, 60), -1
             else:
                 value += (cend - nend) # (value - nend + cend)
 
         #calculate the weeks since the epoch
-        weeks = value / self.week_time 
+        weeks = old_div(value, self.week_time) 
         value %= self.week_time
 
         #calculate the remaining days
@@ -876,7 +888,7 @@ class Calendar(object):
 
             if not is_free:
                 d = end - start
-                d = d.days * 24 * 60 + d.seconds / 60
+                d = d.days * 24 * 60 + old_div(d.seconds, 60)
                 nend = nstart + d
             else:
                 nend = nstart
@@ -892,9 +904,9 @@ class Calendar(object):
     def _recalc_working_time(self):
         def slot_sum_time(day):
             slots = self.working_times.get(day, DEFAULT_WORKING_DAYS[day])
-            return sum(map(lambda slot: slot[1] - slot[0], slots))
+            return sum([slot[1] - slot[0] for slot in slots])
 
-        self.day_times = map(slot_sum_time, range(0, 7))
+        self.day_times = list(map(slot_sum_time, list(range(0, 7))))
         self.week_time = sum(self.day_times)
     #@-node:_recalc_working_time
     #@+node:_make_classes
@@ -935,20 +947,20 @@ if __name__ == '__main__':
     cal = Calendar()
 
     start = EndDate("10.1.2005")
-    print "start", start.strftime(), type(start)
+    print("start", start.strftime(), type(start))
 
     delay = Minutes("4H")
-    print "delay", delay, delay.strftime()
+    print("delay", delay, delay.strftime())
 
-    print "Start", cal.StartDate is StartDate
-    print "base", cal.StartDate.__bases__[0] == StartDate.__bases__[0]
-    print "type", type(start)
+    print("Start", cal.StartDate is StartDate)
+    print("base", cal.StartDate.__bases__[0] == StartDate.__bases__[0])
+    print("type", type(start))
 
-    print "convert start"
+    print("convert start")
     start2 = cal.StartDate(start)
-    print "convert end"
+    print("convert end")
 
     start3 = cal.StartDate("10.1.2005")
-    print "start2", start2.strftime(), type(start2)
+    print("start2", start2.strftime(), type(start2))
 #@-node:@file pcalendar.py
 #@-leo
