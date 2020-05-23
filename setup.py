@@ -40,16 +40,15 @@ def copy_tree(src, dst, filter_=None):
     from distutils.file_util import copy_file
 
     if not os.path.isdir(src):
-        raise DistutilsFileError, \
-              "cannot copy tree '%s': not a directory" % src
+        raise DistutilsFileError("cannot copy tree '%s': not a directory" % src)
     try:
         names = os.listdir(src)
-    except os.error, (errno, errstr):
+    except os.error as xxx_todo_changeme:
+        (errno, errstr) = xxx_todo_changeme.args
         if dry_run:
             names = []
         else:
-            raise DistutilsFileError, \
-                  "error listing files in '%s': %s" % (src, errstr)
+            raise DistutilsFileError("error listing files in '%s': %s" % (src, errstr))
 
     mkpath(dst)
     outputs = []
@@ -188,7 +187,7 @@ try:
 
 
         def chop(self, pathname):
-            print "chop", pathname
+            print("chop", pathname)
             assert pathname.startswith(self.dist_dir)
             return pathname[len(self.dist_dir):]
 
@@ -196,33 +195,33 @@ try:
         def create(self, pathname="dist\\faces.iss"):
             self.pathname = pathname
             ofi = self.file = open(pathname, "w")
-            print >> ofi, "; WARNING: This script has been created by py2exe." + \
-                  " Changes to this script"
-            print >> ofi, "; will be overwritten the next time py2exe is run!"
-            print >> ofi, r"[Languages]"
-            print >> ofi, r'Name: English; MessagesFile: "compiler:Default.isl"'
-            print >> ofi, r'Name: Deutsch; MessagesFile: "compiler:Languages\German.isl"'
-            print >> ofi
+            print("; WARNING: This script has been created by py2exe." + \
+                  " Changes to this script", file=ofi)
+            print("; will be overwritten the next time py2exe is run!", file=ofi)
+            print(r"[Languages]", file=ofi)
+            print(r'Name: English; MessagesFile: "compiler:Default.isl"', file=ofi)
+            print(r'Name: Deutsch; MessagesFile: "compiler:Languages\German.isl"', file=ofi)
+            print(file=ofi)
             
-            print >> ofi, r"[Setup]"
-            print >> ofi, r"AppName=%s" % self.name
-            print >> ofi, r"AppVerName=%s %s" % (self.name, self.version)
-            print >> ofi, r"DefaultDirName={pf}\%s" % self.name
-            print >> ofi, r"DefaultGroupName=%s" % self.name
-            print >> ofi, "Compression=bzip"
-            print >> ofi
+            print(r"[Setup]", file=ofi)
+            print(r"AppName=%s" % self.name, file=ofi)
+            print(r"AppVerName=%s %s" % (self.name, self.version), file=ofi)
+            print(r"DefaultDirName={pf}\%s" % self.name, file=ofi)
+            print(r"DefaultGroupName=%s" % self.name, file=ofi)
+            print("Compression=bzip", file=ofi)
+            print(file=ofi)
 
-            print >> ofi, r"[Files]"
+            print(r"[Files]", file=ofi)
             for path in self.windows_exe_files + self.lib_files:
-                print >> ofi, r'Source: "%s"; DestDir: "{app}\%s"; Flags: ignoreversion'\
-                      % (path, os.path.dirname(path))
-            print >> ofi
+                print(r'Source: "%s"; DestDir: "{app}\%s"; Flags: ignoreversion'\
+                      % (path, os.path.dirname(path)), file=ofi)
+            print(file=ofi)
 
-            print >> ofi, r"[Icons]"
+            print(r"[Icons]", file=ofi)
             for path in self.windows_exe_files:
-                print >> ofi, r'Name: "{group}\%s"; Filename: "{app}\%s"' % \
-                      (self.name, path)
-            print >> ofi, 'Name: "{group}\Uninstall %s"; Filename: "{uninstallexe}"' % self.name
+                print(r'Name: "{group}\%s"; Filename: "{app}\%s"' % \
+                      (self.name, path), file=ofi)
+            print('Name: "{group}\\Uninstall %s"; Filename: "{uninstallexe}"' % self.name, file=ofi)
 
         def compile(self):
             try:
@@ -234,21 +233,21 @@ try:
                     import os
                     os.startfile(self.pathname)
                 else:
-                    print "Ok, using win32api."
+                    print("Ok, using win32api.")
                     win32api.ShellExecute(0, "compile",
                                           self.pathname,
                                           None,
                                           None,
                                           0)
             else:
-                print "Cool, you have ctypes installed."
+                print("Cool, you have ctypes installed.")
                 res = ctypes.windll.shell32.ShellExecuteA(0, "compile",
                                                           self.pathname,
                                                           None,
                                                           None,
                                                           0)
                 if res < 32:
-                    raise RuntimeError, "ShellExecute failed, error %d" % res
+                    raise RuntimeError("ShellExecute failed, error %d" % res)
 
 
 
@@ -269,9 +268,9 @@ try:
                                 self.windows_exe_files,
                                 self.lib_files,
                                 version=faces.__version__)
-            print "*** creating the inno setup script***"
+            print("*** creating the inno setup script***")
             script.create()
-            print "*** compiling the inno setup script***"
+            print("*** compiling the inno setup script***")
             script.compile()
 
 
