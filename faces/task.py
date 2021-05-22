@@ -53,7 +53,7 @@ import warnings
 from . import locale
 import weakref
 import opcode
-import new
+import types
 from functools import reduce
 try:
     set
