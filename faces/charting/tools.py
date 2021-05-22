@@ -22,7 +22,7 @@
 
 import matplotlib.transforms as _mtrans
 import matplotlib.patches as _patches
-import matplotlib.numerix as _numerix
+import numpy as _numerix
 import matplotlib.font_manager as _font
 
 chart_encoding = "iso8859-15"
